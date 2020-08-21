@@ -1,0 +1,21 @@
+{
+  "name": "twilio-phone-burner",
+  "version": "1.0.0",
+  "description": "A browser-based dialer UI powered by Twilio Client",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "./node_modules/.bin/eslint . && NODE_ENV=test TWILIO_ACCOUNT_SID=my-account-sid TWILIO_AUTH_TOKEN=my-auth-token TWILIO_NUMBER=my-twilio-number TWILIO_TWIML_APP_SID=app-sid ./node_modules/mocha/bin/mocha spec --recursive"
+  },
+  "engineStrict": true,
+  "author": "Sam Proschansky",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "cors": "^2.8.5",
+    "dotenv-safe": "^3.0.0",
+    "express": "^4.14.0",
+    "multer": "^1.4.2",
+    "twilio": "^3.48.2"
+  }
+}
