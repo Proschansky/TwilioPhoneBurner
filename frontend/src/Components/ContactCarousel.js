@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Carousel } from "react-bootstrap";
 import axios from "axios";
 import Rating from "./Rating";
@@ -9,6 +9,12 @@ export default function Contacts(props) {
   const globalState = useContext(store);
   const { state, dispatch } = globalState;
   const { calling, contacts, conferenceId, index } = state;
+
+  const [slideIndex, setSlideIndex] = React.useState(index);
+
+  useEffect(()=>{
+    setSlideIndex(index)
+  }, [index])
 
   function next() {
     dispatch({ type: "NEXT" });
@@ -107,7 +113,8 @@ export default function Contacts(props) {
   return (
     <Carousel
       className="h-100 p-5"
-      active={index}
+      activeIndex={slideIndex}
+      indicators={true}
       nextIcon={nextIcon}
       prevIcon={prevIcon}
     >

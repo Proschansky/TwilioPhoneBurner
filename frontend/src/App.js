@@ -87,7 +87,6 @@ export default function App() {
   }, [])
 
   useEffect(()=>{
-    console.log("BURNING", burning, "INDEX", index, "NEXT INDEX", nextIndex)
     if(index === nextIndex && burning){
       makeCall(contacts[index].phoneNumber);
     }
@@ -95,14 +94,20 @@ export default function App() {
 
   const makeCall = async (phoneNum) => {
     dispatch({ type: "MAKE_CALL" });
+    setNextIndex(index + 1);
     return Device.connect({ number: phoneNum });
   };
 
   const hangUp = (ind = index, nxt = nextIndex) => {
     Device.disconnectAll();
-    dispatch({ type: "BURNING_NEXT" });
-    if (contacts[nextIndex]) {
-      makeCall(contacts[nextIndex].phoneNumber);
+    dispatch({ type: "BURNING_NEXT" })
+    if (contacts[nextIndex]){
+      console.log("CONTACT", contacts[nextIndex].phoneNumber)
+      Device.ready(function(){
+        makeCall(contacts[nextIndex].phoneNumber)
+      })
+    } else {
+      dispatch({ type: "HANG_UP"});
     }
   };
 
@@ -115,6 +120,7 @@ export default function App() {
             onClick={() => {
               dispatch({ type: "CANCEL_INCOMING" });
               dispatch({ type: "HANG_UP" });
+              Device.disconnectAll();
             }}
             style={{
               overflow: "hidden",
@@ -189,24 +195,6 @@ export default function App() {
     );
   };
 
-  //   useEffect(()=>{
-  //     axios.get('https://recruiter.jobs2me.com/v2/phoneburner/api/phoneNumbers.php').then(res => {
-
-  //       const { data } = res;
-
-  //       for(let i = 0; i < data.length; i++){
-  //         let contact = {
-  //           name: `${data[i].fname} ${data[i].lname}`,
-  //           emailAddress: data[i].email,
-  //           phoneNumber: `+1${data[i].phone}`,
-  //           rating: 0
-  //         }
-
-  //         dispatch({  type: "ADD_CONTACT", contact: contact });
-  //       }
-  //     console.log(contacts)
-  //   });
-  // },[dispatch]);
   const pageContent = () => {
     if (incoming) {
       return <IncomingCall />;
@@ -220,9 +208,6 @@ export default function App() {
     <>
       <div className={`container bg-dark ${flex}`} style={{ height: "500px" }}>
         {pageContent()}
-      </div>
-      <div className="row d-flex justify-content-center">
-        <MessageInput />
       </div>
     </>
   );
