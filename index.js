@@ -94,8 +94,9 @@ app.post("/voice", (request, response) => {
     const voiceResponse = new VoiceResponse();
     voiceResponse.dial(
       {
-        action: `https://twiliophoneburner.herokuapp.com/sendMessage/${request.body.number}?message=${request.body.message}`,
+        action: `https://twiliophoneburner.herokuapp.com/sendMessage/${request.body.number}`,
         method: "POST",
+        message: request.body.message,
         callerId: process.env.TWILIO_NUMBER,
         timeout: 5
       },
