@@ -121,6 +121,7 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
   const { DialCallStatus } = request.body;
   console.log("SEND MESSAGE REQUEST PARAMETERS", request.params);
   console.log("SEND MESSAGE REQUEST QUERY", request.query);
+  const message = request.query.message;
   // console.log("DIAL STATUS", request.params.DialCallStatus)
   
   if (DialCallStatus === "no-answer"){
