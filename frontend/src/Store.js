@@ -12,7 +12,8 @@ const initialState = {
     name: "Sam Proschansky",
     emailAddress: "sam@jobs2me.com",
     phoneNumber: "+14044095814",
-    rating: 5.0
+    rating: 5.0,
+    message: "Hello world!"
   }],
 };
 
