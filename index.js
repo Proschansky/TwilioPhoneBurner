@@ -112,6 +112,7 @@ app.post("/callStatus", (request, response) => {
 });
 
 app.post("/sendMessage/:phoneNumber/:message", (request, response) => {
+  console.log("ROUTE HIT", request.params)
   const { phoneNumber, message } = request.params;
   const { DialCallStatus } = request.body;
   console.log("SEND MESSAGE REQUEST PARAMETERS", request.params);
