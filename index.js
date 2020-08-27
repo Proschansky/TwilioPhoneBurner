@@ -94,7 +94,7 @@ app.post("/voice", (request, response) => {
     const voiceResponse = new VoiceResponse();
     voiceResponse.dial(
       {
-        action: `https://twiliophoneburner.herokuapp.com/sendMessage/${request.body.number}/${request.body.message}`,
+        action: `https://twiliophoneburner.herokuapp.com/sendMessage/${request.body.number}?message=${request.body.message}`,
         method: "POST",
         callerId: process.env.TWILIO_NUMBER,
         timeout: 5
@@ -114,10 +114,11 @@ app.post("/callStatus", (request, response) => {
 
 app.post("/sendMessage/:phoneNumber/:message", (request, response) => {
   console.log("ROUTE HIT", request.params)
-  const { phoneNumber, message } = request.params;
+  const { phoneNumber } = request.params;
   const { DialCallStatus } = request.body;
   console.log("SEND MESSAGE REQUEST PARAMETERS", request.params);
   console.log("SEND MESSAGE REQUEST BODY", request.body);
+  console.log("SEND MESSAGE REQUEST QUERY", request.query);
   // console.log("DIAL STATUS", request.params.DialCallStatus)
   
   if (DialCallStatus === "no-answer"){
