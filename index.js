@@ -86,12 +86,14 @@ app.post("/incoming", (request, response) => {
 });
 
 // Create TwiML for outbound calls
-app.post("/voice", (request, response) => {
+app.post("/voice/:message", (request, response) => {
+  const { message } = request.params;
+  console.log("REQUEST BODY", request.body, "REQUEST PARAMS", request.params);
   try {
     const voiceResponse = new VoiceResponse();
     voiceResponse.dial(
       {
-        action: `https://twiliophoneburner.herokuapp.com/sendMessage/${request.body.number}`,
+        action: `https://twiliophoneburner.herokuapp.com/sendMessage/${request.body.number}/${message}`,
         method: "POST",
         callerId: process.env.TWILIO_NUMBER,
         timeout: 5
@@ -109,8 +111,8 @@ app.post("/callStatus", (request, response) => {
   response.end();
 });
 
-app.post("/sendMessage/:phoneNumber", (request, response) => {
-  const { phoneNumber } = request.params;
+app.post("/sendMessage/:phoneNumber/:message", (request, response) => {
+  const { phoneNumber, message } = request.params;
   const { DialCallStatus } = request.body;
   console.log("SEND MESSAGE REQUEST PARAMETERS", request.params);
   console.log("SEND MESSAGE REQUEST BODY", request.body);
@@ -120,7 +122,7 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
     
     client.messages
       .create({
-        body: "Hello from jobs2me.",
+        body: message,
         to: phoneNumber,
         from: process.env.TWILIO_NUMBER,
       })
@@ -131,7 +133,7 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
 
     setTimeout(() => {
       response.type("text/xml");
-      response.send(voiceResponse.toString());
+      response.send(voiceResponse.toString());  
     }, 5000);
   }
 
