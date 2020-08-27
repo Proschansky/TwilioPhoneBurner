@@ -66,7 +66,7 @@ export default function Contacts(props) {
     ) : (
       <button
         className="ml-2 mb-1 btn bg-light linkButton ml-5"
-        onClick={() => props.makeCall(contacts[idx].phoneNumber)}
+        onClick={() => props.makeCall(contacts[idx].phoneNumber, contacts[idx].message)}
       >
         <i className="fa fa-phone" aria-hidden="true"></i>
       </button>

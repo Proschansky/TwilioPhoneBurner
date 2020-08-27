@@ -78,6 +78,7 @@ export default function App() {
 
   useEffect(()=>{
     Device.on("disconnect", async (res) => {
+      console.log(res);
       if (!res.sendHangup) {
         dispatch({ type: "HANG_UP" });
         dispatch({ type: "BURNING_NEXT"});
@@ -92,10 +93,10 @@ export default function App() {
     }
   }, [index, nextIndex])
 
-  const makeCall = async (phoneNum) => {
+  const makeCall = async (phoneNum, message) => {
     dispatch({ type: "MAKE_CALL" });
     setNextIndex(index + 1);
-    return Device.connect({ number: phoneNum });
+    return Device.connect({ number: phoneNum, message: message });
   };
 
   const hangUp = (ind = index, nxt = nextIndex) => {
@@ -104,7 +105,7 @@ export default function App() {
     if (contacts[nextIndex]){
       console.log("CONTACT", contacts[nextIndex].phoneNumber)
       Device.ready(function(){
-        makeCall(contacts[nextIndex].phoneNumber)
+        makeCall(contacts[nextIndex].phoneNumber, contacts[nextIndex].message)
       })
     } else {
       dispatch({ type: "HANG_UP"});

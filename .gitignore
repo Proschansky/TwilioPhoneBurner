@@ -49,4 +49,4 @@ jspm_packages
 .env
 
 #Store.js with personal data
-frontend/src/Store.js
+# frontend/src/Store.js

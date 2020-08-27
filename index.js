@@ -1,5 +1,8 @@
 "use strict";
 
+if (process.env.NODE_ENV !== 'production'){
+  require('dotenv').config()
+}
 require("dotenv").config();
 const http = require("http");
 const express = require("express");
@@ -14,7 +17,6 @@ const fs = require("fs");
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = require("twilio")(accountSid, authToken);
-let message;
 
 const allowCrossDomain = function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
