@@ -90,11 +90,13 @@ app.post("/incoming", (request, response) => {
 // Create TwiML for outbound calls
 app.post("/voice", (request, response) => {
   console.log(request.body.message);
+  let message = encodeURIComponent(request.body.message);
+  console.log(message)
   try {
     const voiceResponse = new VoiceResponse();
     voiceResponse.dial(
       {
-        action: `https://twiliophoneburner.herokuapp.com/sendMessage/${request.body.number}?message=${request.body.message}`,
+        action: `https://twiliophoneburner.herokuapp.com/sendMessage/${request.body.number}%20?message=${message}`,
         method: "POST",
         message: request.body.message,
         callerId: process.env.TWILIO_NUMBER,
