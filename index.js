@@ -68,6 +68,7 @@ app.get("/token", (request, response) => {
 });
 
 app.post("/incoming", (request, response) => {
+  console.log("REQUEST BODY", request.body);
   try {
     const twiml = new VoiceResponse();
     const dial = twiml.dial();
