@@ -103,7 +103,7 @@ app.post("/voice", (request, response) => {
         action: `https://twiliophoneburner.herokuapp.com/sendMessage/${request.body.number}%20?message=${message}`,
         method: "POST",
         message: request.body.message,
-        callerId: process.env.TWILIO_NUMBER,
+        callerId: request.body.from,
         timeout: 10
       },
       request.body.number
@@ -123,8 +123,7 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
   console.log("ROUTE HIT", request.params)
   const { phoneNumber } = request.params;
   const { DialCallStatus } = request.body;
-  console.log("SEND MESSAGE REQUEST PARAMETERS", request.params);
-  console.log("SEND MESSAGE REQUEST QUERY", request.query);
+  console.log("SEND MESSAGE REQUEST BODY", request.body);
   const message = request.query.message;
   // console.log("DIAL STATUS", request.params.DialCallStatus)
   
