@@ -123,7 +123,7 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
   console.log("ROUTE HIT", request.params)
   const { phoneNumber } = request.params;
   const { DialCallStatus } = request.body;
-  console.log("SEND MESSAGE REQUEST BODY", request.body);
+  console.log("SEND MESSAGE REQUEST BODY MESSAGE", request.body.Mesage);
   const message = request.query.message;
   // console.log("DIAL STATUS", request.params.DialCallStatus)
   
