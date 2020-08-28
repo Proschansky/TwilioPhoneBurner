@@ -126,6 +126,7 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
   const { DialCallStatus } = request.body;
   console.log("SEND MESSAGE REQUEST QUERY", request.query);
   const message = request.query.message;
+  const from = request.query.from;
   // console.log("DIAL STATUS", request.params.DialCallStatus)
   
   if (DialCallStatus === "no-answer"){
@@ -134,7 +135,7 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
       .create({
         body: message,
         to: phoneNumber,
-        from: process.env.TWILIO_NUMBER,
+        from: from
       })
       .then((message) => console.log("Message", message))
       .catch((err) => console.log("ERROR", err));
