@@ -93,9 +93,9 @@ app.post("/incoming", (request, response) => {
 
 // Create TwiML for outbound calls
 app.post("/voice", (request, response) => {
-  console.log(request.body);
+  console.log("VOICE REQUEST BODY", request.body);
   let message = encodeURIComponent(request.body.message);
-  console.log(message)
+  
   try {
     const voiceResponse = new VoiceResponse();
     voiceResponse.dial(
