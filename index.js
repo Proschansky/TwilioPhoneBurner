@@ -17,6 +17,7 @@ const fs = require("fs");
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = require("twilio")(accountSid, authToken);
+const axios = require('axios');
 
 const allowCrossDomain = function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -69,6 +70,8 @@ app.get("/token", (request, response) => {
 
 app.post("/incoming", (request, response) => {
   console.log("REQUEST BODY", request.body);
+  axios.post('https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRoute.php', request.body)
+  .then(res => console.log("RESULT ", res));
   try {
     const twiml = new VoiceResponse();
     const dial = twiml.dial();
