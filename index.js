@@ -101,7 +101,7 @@ app.post("/voice", (request, response) => {
         method: "POST",
         message: request.body.message,
         callerId: process.env.TWILIO_NUMBER,
-        timeout: 5
+        timeout: 10
       },
       request.body.number
     );
