@@ -85,7 +85,6 @@ app.post("/incoming", (request, response) => {
       {
         statusCallbackEvent: "initiated ringing answered completed",
         statusCallback: "https://twiliophoneburner.herokuapp.com/callStatus",
-        action: "https://twiliophoneburner.herokuapp.com/voiceMail",
         statusCallbackMethod: "POST",
       },
       officeIds[request.body.To]
@@ -102,6 +101,7 @@ app.post("/incoming", (request, response) => {
 app.post("voiceMail", (request, response)=>{
   console.log("REQUEST BODY", request.body)
 });
+
 // Create TwiML for outbound calls
 app.post("/voice", (request, response) => {
   console.log("VOICE REQUEST BODY", request.body);
