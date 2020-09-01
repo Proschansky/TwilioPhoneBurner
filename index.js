@@ -88,7 +88,6 @@ app.post("/incoming", (request, response) => {
       officeIds[request.body.To]
     );
 
-    dial.action = "https://twiliophoneburner.herokuapp.com/voiceMail",
     // Render the response as XML in reply to the webhook request
     response.type("text/xml");
     response.send(twiml.toString());
