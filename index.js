@@ -41,7 +41,8 @@ app.use(urlencoded({ extended: false }));
 app.use(express.static(__dirname + "/public"));
 
 // Generate a Twilio Client capability token
-app.get("/token", (request, response) => {
+app.get("/token/:officeId", (request, response) => {
+  const { officeId } = request.params;
   try{
     const capability = new ClientCapability({
       accountSid: process.env.TWILIO_ACCOUNT_SID,
@@ -54,7 +55,7 @@ app.get("/token", (request, response) => {
       })
     );
   
-    capability.addScope(new ClientCapability.IncomingClientScope("sam"));
+    capability.addScope(new ClientCapability.IncomingClientScope(officeId));
   
     const token = capability.toJwt();
   
