@@ -74,7 +74,8 @@ app.get("/token/:officeId", (request, response) => {
 });
 
 app.post("/incoming", (request, response) => {
-  console.log("REQUEST BODY", request.body);
+  console.log("REQUEST BODY", request.body.To);
+  console.log("NUMBERS", officeIds[request.body.To]);
   axios.post('https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRoute.php', request.body)
   .then(res => console.log("RESULT ", res));
   try {
