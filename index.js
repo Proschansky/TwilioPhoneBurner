@@ -74,8 +74,6 @@ app.get("/token/:officeId", (request, response) => {
 });
 
 app.post("/incoming", (request, response) => {
-  console.log("REQUEST BODY", request.body.To);
-  console.log("NUMBERS", officeIds[request.body.To]);
   axios.post('https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRoute.php', request.body)
   .then(res => console.log("RESULT ", res));
   try {
@@ -85,6 +83,7 @@ app.post("/incoming", (request, response) => {
       {
         statusCallbackEvent: "initiated ringing answered completed",
         statusCallback: "https://twiliophoneburner.herokuapp.com/callStatus",
+        action: "https://twiliophoneburner.herokuapp.com/voiceMail",
         statusCallbackMethod: "POST",
       },
       officeIds[request.body.To]
@@ -98,8 +97,8 @@ app.post("/incoming", (request, response) => {
 });
 
 //Handles incoming call voice mail.
-app.post("voiceMail", (request, response)=>{
-  console.log("REQUEST BODY", request.body)
+app.post("/voiceMail", (request, response)=>{
+  console.log("VOICE MAIL REQUEST BODY", request.body)
 });
 
 // Create TwiML for outbound calls
