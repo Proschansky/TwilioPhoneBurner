@@ -19,6 +19,10 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const client = require("twilio")(accountSid, authToken);
 const axios = require('axios');
 
+const officeIds = {
+  "+14705707952": "8976"
+}
+
 const allowCrossDomain = function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
@@ -82,7 +86,7 @@ app.post("/incoming", (request, response) => {
         statusCallback: "https://twiliophoneburner.herokuapp.com/callStatus",
         statusCallbackMethod: "POST",
       },
-      "sam"
+      officeIds[request.body.To]
     );
     // Render the response as XML in reply to the webhook request
     response.type("text/xml");
