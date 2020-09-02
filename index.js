@@ -81,7 +81,7 @@ app.post("/incoming", (request, response) => {
     const dial = twiml.dial({
       action: "https://twiliophoneburner.herokuapp.com/voiceMail"
     });
-    
+
     dial.client(
       {
         statusCallbackEvent: "initiated ringing answered completed",
@@ -101,7 +101,18 @@ app.post("/incoming", (request, response) => {
 
 //Handles incoming call voice mail.
 app.post("/voiceMail", (request, response)=>{
-  console.log("VOICE MAIL REQUEST BODY", request.body)
+  console.log("VOICE MAIL REQUEST BODY", request.body);
+  if(request.body.DialCallStatus === "no-answer"){
+    const twiml = new VoiceResponse();
+    twiml.say("Please leave a message at the beep. Press the star key when finished.");
+    twiml.record({
+      timeout: 20,
+      finishOnKey: "*"
+    });
+    twiml.hangup();
+    response.type("text/xml");
+    response.send(twiml.toString());
+  }
 });
 
 // Create TwiML for outbound calls
