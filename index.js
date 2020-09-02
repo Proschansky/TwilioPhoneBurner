@@ -16,7 +16,7 @@ const upload = multer();
 const fs = require("fs");
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
-const client = require("twilio")(accountSid, authToken);
+// const client = require("twilio")(accountSid, authToken);
 const axios = require('axios');
 
 const officeIds = {
@@ -120,12 +120,14 @@ app.post("/voice", (request, response) => {
   console.log("VOICE REQUEST BODY", request.body);
   let message = encodeURIComponent(request.body.message);
   let from = encodeURIComponent(request.body.from);
+  let sid = encodeURIComponent(request.body.sid);
+  let authtoken = encodeURIComponent(request.body.token)
 
   try {
     const voiceResponse = new VoiceResponse();
     voiceResponse.dial(
       {
-        action: `https://twiliophoneburner.herokuapp.com/sendMessage/${request.body.number}%20?message=${message}&from=${from}`,
+        action: `https://twiliophoneburner.herokuapp.com/sendMessage/${request.body.number}%20?message=${message}&from=${from}&sid=${sid}&token=${token}`,
         method: "POST",
         message: request.body.message,
         callerId: request.body.from,
@@ -151,10 +153,12 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
   console.log("SEND MESSAGE REQUEST QUERY", request.query);
   const message = request.query.message;
   const from = request.query.from;
+  const sid = request.query.sid;
+  const token = request.query.token;
   // console.log("DIAL STATUS", request.params.DialCallStatus)
   
   if (DialCallStatus === "no-answer"){
-    
+    const client = require('twilio')(sid, token);
     client.messages
       .create({
         body: message,
