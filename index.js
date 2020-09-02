@@ -68,7 +68,7 @@ app.get("/token/:officeId/:sid/:token", (request, response) => {
       token: token,
     });
   } catch (e){
-    res.send(e)
+    response.send(e)
   }
   
 });
