@@ -121,7 +121,7 @@ app.post("/voice", (request, response) => {
   let message = encodeURIComponent(request.body.message);
   let from = encodeURIComponent(request.body.from);
   let sid = encodeURIComponent(request.body.sid);
-  let authtoken = encodeURIComponent(request.body.token)
+  let token = encodeURIComponent(request.body.token)
 
   try {
     const voiceResponse = new VoiceResponse();
