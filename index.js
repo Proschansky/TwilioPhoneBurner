@@ -107,8 +107,7 @@ app.post("/voiceMail", (request, response)=>{
     const twiml = new VoiceResponse();
     twiml.say("Please leave a message at the beep. Press the star key when finished.");
     twiml.record({
-      timeout: 20,
-      finishOnKey: "*"
+      timeout: 20
     });
     twiml.hangup();
     response.type("text/xml");
