@@ -101,7 +101,8 @@ app.post("/incoming", (request, response) => {
 
 //Handles incoming call voice mail.
 app.post("/voiceMail", (request, response)=>{
-  console.log("VOICE MAIL REQUEST BODY", request.body);
+  axios.post('https://recruiter.jobs2me.com/v2/process/twilio/route.php?method=missedCall', request.body)
+  .then(res => console.log("VOICEMAIL POSTED", res.data));
   if(request.body.DialCallStatus === "no-answer"){
     const twiml = new VoiceResponse();
     twiml.say("Please leave a message at the beep. Press the star key when finished.");
