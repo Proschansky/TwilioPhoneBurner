@@ -89,17 +89,17 @@ app.post("/incoming", (request, response) => {
     const dial = twiml.dial({
       action: "https://twiliophoneburner.herokuapp.com/voiceMail"
     });
-
-    dial.client(
+    
+    let client = dial.client(
       {
         statusCallbackEvent: "initiated ringing answered completed",
         statusCallback: "https://twiliophoneburner.herokuapp.com/callStatus",
         statusCallbackMethod: "POST"
       },
       officeIds[request.body.To]
-    ).parameter({
-      callerName: callerName
-    });
+    )
+    
+    client.parameter({callerName: callerName});
 
     // Render the response as XML in reply to the webhook request
     response.type("text/xml");
