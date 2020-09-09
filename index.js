@@ -102,6 +102,8 @@ app.post("/incoming", async (request, response) => {
 
     client.parameter({callerName: callerName});
 
+    console.log("CALLER NAME", client)
+
     // Render the response as XML in reply to the webhook request
     response.type("text/xml");
     response.send(twiml.toString());
