@@ -74,8 +74,8 @@ app.get("/token/:officeId/:sid/:token", (request, response) => {
 });
 
 app.post("/incoming", (request, response) => {
-  axios.post('https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRoute.php', request.body)
-  
+  axios.post('https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRoute.php', request.body);
+  console.log("REQUEST BODY", request.body)
   try {
     const twiml = new VoiceResponse();
     const dial = twiml.dial({
