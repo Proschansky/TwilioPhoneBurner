@@ -73,14 +73,14 @@ app.get("/token/:officeId/:sid/:token", (request, response) => {
   
 });
 
-app.post("/incoming", (request, response) => {
+app.post("/incoming", async (request, response) => {
   axios.post('https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRoute.php', request.body);
   const To = request.body.To.slice(1);
   const From = request.body.From.slice(1);
 
   console.log("To", To, "From", From);
 
-  const callerName = axios.get(`https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRouteGet.php?twilioNumber=${To}&callFrom=${From}`)
+  const callerName = await axios.get(`https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRouteGet.php?twilioNumber=${To}&callFrom=${From}`)
   .then(res => { return res.data.callerName });
 
   console.log("CALLER NAME", callerName);
