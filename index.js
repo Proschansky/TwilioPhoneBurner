@@ -77,15 +77,14 @@ app.post("/incoming", (request, response) => {
   axios.post('https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRoute.php', request.body);
   const To = request.body.To.slice(1);
   const From = request.body.From.slice(1);
-  let callerName;
 
   console.log("To", To, "From", From);
 
-  axios.get(`https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRouteGet.php?twilioNumber=${To}&callFrom=${From}`)
-  .then(res => callerName = res.data.callerName);
+  const callerName = axios.get(`https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRouteGet.php?twilioNumber=${To}&callFrom=${From}`)
+  .then(res => { return res.data.callerName });
 
   console.log("CALLER NAME", callerName);
-  
+
   try {
     const twiml = new VoiceResponse();
     const dial = twiml.dial({
