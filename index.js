@@ -77,11 +77,12 @@ app.post("/incoming", (request, response) => {
   axios.post('https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRoute.php', request.body);
   const To = request.body.To.slice(1);
   const From = request.body.From.slice(1);
+  let callerName;
 
   console.log("To", To, "From", From);
 
   axios.get(`https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRouteGet.php?twilioNumber=${To}&callFrom=${From}`)
-  .then(res => console.log("RESULT", res.data));
+  .then(res => callerName = res.data.callerName);
 
   try {
     const twiml = new VoiceResponse();
@@ -96,7 +97,9 @@ app.post("/incoming", (request, response) => {
         statusCallbackMethod: "POST"
       },
       officeIds[request.body.To]
-    );
+    ).parameter({
+      callerName: callerName
+    });
 
     // Render the response as XML in reply to the webhook request
     response.type("text/xml");
