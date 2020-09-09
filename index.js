@@ -75,14 +75,13 @@ app.get("/token/:officeId/:sid/:token", (request, response) => {
 
 app.post("/incoming", (request, response) => {
   axios.post('https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRoute.php', request.body);
-  console.log("REQUEST BODY", request.body);
   const To = request.body.To.slice(0);
   const From = request.body.From.slice(0);
 
   console.log("To", To, "From", From);
-  
+
   axios.get(`https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRouteGet.php?twilioNumber=${To}&callFrom=${From}`)
-  .then(res => console.log("RESULT", res));
+  .then(res => console.log("RESULT", res.data));
 
   try {
     const twiml = new VoiceResponse();
