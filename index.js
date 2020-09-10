@@ -80,8 +80,8 @@ app.post("/incoming", async (request, response) => {
 
   console.log("To", To, "From", From);
 
-  // const callerName = await axios.get(`https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRouteGet.php?twilioNumber=${To}&callFrom=${From}`)
-  // .then(res => { return res.data.callerName });
+  const callerName = await axios.get(`https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRouteGet.php?twilioNumber=${To}&callFrom=${From}`)
+  .then(res => { return res.data.callerName });
   
   await axios.get('https://recruiter.jobs2me.com/v2/nav/topnav.php?fyIHpQ5JgI4NtWgOMvwe');
 
@@ -102,7 +102,7 @@ app.post("/incoming", async (request, response) => {
       officeIds[request.body.To]
     )
 
-    // client.parameter({callerName: callerName});
+    client.parameter({callerName: callerName});
     // Render the response as XML in reply to the webhook request
     response.type("text/xml");
     response.send(twiml.toString());
