@@ -85,7 +85,7 @@ app.post("/incoming", async (request, response) => {
   
   // await axios.get('https://recruiter.jobs2me.com/v2/nav/topnav.php?fyIHpQ5JgI4NtWgOMvwe');
 
-  // console.log("CALLER NAME", callerName);
+  console.log("CALLER NAME", callerName);
 
   try {
     const twiml = new VoiceResponse();
