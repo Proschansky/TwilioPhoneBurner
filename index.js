@@ -84,7 +84,6 @@ app.post("/incoming", async (request, response) => {
       `https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRouteGet.php?twilioNumber=${To}&callFrom=${From}`
     )
     .then((res) => {
-      console.log('RES DATA', res.data)
       return res.data.callerName;
     });
 
@@ -122,6 +121,7 @@ app.post("/api/handlerFail", (request, response) => {
 
 //Handles incoming call voice mail.
 app.post("/voiceMail", (request, response) => {
+  console.log("VOICEMAIL REQUEST", request.body);
   try {
     axios
       .post(
