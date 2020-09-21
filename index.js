@@ -173,6 +173,7 @@ app.post("/voice", (request, response) => {
 });
 
 app.post("/callStatus", (request, response) => {
+  console.log("REQUEST BODY", request.body);
   response.end();
 });
 
