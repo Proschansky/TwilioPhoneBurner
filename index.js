@@ -45,7 +45,7 @@ app.use(urlencoded({ extended: false }));
 app.use(express.static(__dirname + "/public"));
 
 // Generate a Twilio Client capability token
-app.get("/token/:officeId/:sid/:token", (request, response) => {
+app.get("/token/:officeId/:sid/:token/:sid_token", (request, response) => {
   const { officeId } = request.params;
   try {
     const capability = new ClientCapability({
@@ -55,7 +55,7 @@ app.get("/token/:officeId/:sid/:token", (request, response) => {
 
     capability.addScope(
       new ClientCapability.OutgoingClientScope({
-        applicationSid: process.env.TWILIO_TWIML_APP_SID,
+        applicationSid: request.params.sid_token
       })
     );
 
