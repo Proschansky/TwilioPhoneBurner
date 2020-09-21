@@ -115,6 +115,10 @@ app.post("/incoming", async (request, response) => {
   }
 });
 
+app.post("/api/handlerFail", (request, response) => {
+  console.log("FAILED", request.body)
+})
+
 //Handles incoming call voice mail.
 app.post("/voiceMail", (request, response) => {
   try {
