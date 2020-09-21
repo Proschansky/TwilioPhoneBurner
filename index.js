@@ -1,7 +1,7 @@
 "use strict";
 
-if (process.env.NODE_ENV !== 'production'){
-  require('dotenv').config()
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
 }
 require("dotenv").config();
 const http = require("http");
@@ -17,11 +17,11 @@ const fs = require("fs");
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 // const client = require("twilio")(accountSid, authToken);
-const axios = require('axios');
+const axios = require("axios");
 
 const officeIds = {
-  "+14705707952": "8976"
-}
+  "+14705707952": "8976",
+};
 
 const allowCrossDomain = function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -46,31 +46,30 @@ app.use(express.static(__dirname + "/public"));
 
 // Generate a Twilio Client capability token
 app.get("/token/:officeId/:sid/:token", (request, response) => {
-  const { officeId, } = request.params;
-  try{
+  const { officeId } = request.params;
+  try {
     const capability = new ClientCapability({
       accountSid: request.params.sid,
-      authToken: request.params.token
+      authToken: request.params.token,
     });
-  
+
     capability.addScope(
       new ClientCapability.OutgoingClientScope({
         applicationSid: process.env.TWILIO_TWIML_APP_SID,
       })
     );
-  
+
     capability.addScope(new ClientCapability.IncomingClientScope(officeId));
-  
+
     const token = capability.toJwt();
-  
+
     // Include token in a JSON response
     response.send({
       token: token,
     });
-  } catch (e){
-    response.send(e)
+  } catch (e) {
+    response.send(e);
   }
-  
 });
 
 app.post("/incoming", async (request, response) => {
@@ -80,9 +79,14 @@ app.post("/incoming", async (request, response) => {
 
   console.log("To", To, "From", From);
 
-  const callerName = await axios.get(`https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRouteGet.php?twilioNumber=${To}&callFrom=${From}`)
-  .then(res => { return res.data.callerName });
-  
+  const callerName = await axios
+    .get(
+      `https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRouteGet.php?twilioNumber=${To}&callFrom=${From}`
+    )
+    .then((res) => {
+      return res.data.callerName;
+    });
+
   // await axios.get('https://recruiter.jobs2me.com/v2/nav/topnav.php?fyIHpQ5JgI4NtWgOMvwe');
 
   console.log("CALLER NAME", callerName);
@@ -90,19 +94,19 @@ app.post("/incoming", async (request, response) => {
   try {
     const twiml = new VoiceResponse();
     const dial = twiml.dial({
-      action: "https://twiliophoneburner.herokuapp.com/voiceMail"
+      action: "https://twiliophoneburner.herokuapp.com/voiceMail",
     });
-    
+
     let client = dial.client(
       {
         statusCallbackEvent: "initiated ringing answered completed",
         statusCallback: "https://twiliophoneburner.herokuapp.com/callStatus",
-        statusCallbackMethod: "POST"
+        statusCallbackMethod: "POST",
       },
       officeIds[request.body.To]
-    )
+    );
 
-    client.parameter({callerName: callerName});
+    client.parameter({ callerName: callerName });
     // Render the response as XML in reply to the webhook request
     response.type("text/xml");
     response.send(twiml.toString());
@@ -112,18 +116,28 @@ app.post("/incoming", async (request, response) => {
 });
 
 //Handles incoming call voice mail.
-app.post("/voiceMail", (request, response)=>{
-  axios.post('https://recruiter.jobs2me.com/v2/process/twilio/route.php?method=missedCall', request.body)
-  .then(res => console.log("VOICEMAIL POSTED", res.data));
-  if(request.body.DialCallStatus === "no-answer"){
-    const twiml = new VoiceResponse();
-    twiml.say("Please leave a message at the beep. Press the star key when finished.");
-    twiml.record({
-      timeout: 20
-    });
-    twiml.hangup();
-    response.type("text/xml");
-    response.send(twiml.toString());
+app.post("/voiceMail", (request, response) => {
+  try {
+    axios
+      .post(
+        "https://recruiter.jobs2me.com/v2/process/twilio/route.php?method=missedCall",
+        request.body
+      )
+      .then((res) => console.log("VOICEMAIL POSTED", res.data));
+    if (request.body.DialCallStatus === "no-answer") {
+      const twiml = new VoiceResponse();
+      twiml.say(
+        "Please leave a message at the beep. Press the star key when finished."
+      );
+      twiml.record({
+        timeout: 20,
+      });
+      twiml.hangup();
+      response.type("text/xml");
+      response.send(twiml.toString());
+    }
+  } catch(e){
+    console.log("ERROR IN VOICEMAIL", e);
   }
 });
 
@@ -133,7 +147,7 @@ app.post("/voice", (request, response) => {
   let message = encodeURIComponent(request.body.message);
   let from = encodeURIComponent(request.body.from);
   let sid = encodeURIComponent(request.body.sid);
-  let token = encodeURIComponent(request.body.token)
+  let token = encodeURIComponent(request.body.token);
 
   try {
     const voiceResponse = new VoiceResponse();
@@ -143,7 +157,7 @@ app.post("/voice", (request, response) => {
         method: "POST",
         message: request.body.message,
         callerId: request.body.from,
-        timeout: 10
+        timeout: 10,
       },
       request.body.number
     );
@@ -159,7 +173,7 @@ app.post("/callStatus", (request, response) => {
 });
 
 app.post("/sendMessage/:phoneNumber", (request, response) => {
-  console.log("ROUTE HIT", request.params)
+  console.log("ROUTE HIT", request.params);
   const { phoneNumber } = request.params;
   const { DialCallStatus } = request.body;
   console.log("SEND MESSAGE REQUEST QUERY", request.query);
@@ -168,14 +182,14 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
   const sid = request.query.sid;
   const token = request.query.token;
   // console.log("DIAL STATUS", request.params.DialCallStatus)
-  
-  if (DialCallStatus === "no-answer"){
-    const client = require('twilio')(sid, token);
+
+  if (DialCallStatus === "no-answer") {
+    const client = require("twilio")(sid, token);
     client.messages
       .create({
         body: message,
         to: phoneNumber,
-        from: from
+        from: from,
       })
       .then((message) => console.log("Message", message))
       .catch((err) => console.log("ERROR", err));
@@ -184,11 +198,9 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
 
     setTimeout(() => {
       response.type("text/xml");
-      response.send(voiceResponse.toString());  
+      response.send(voiceResponse.toString());
     }, 5000);
-  }
-
-  else {
+  } else {
     const voiceResponse = new VoiceResponse();
     voiceResponse.hangup();
     response.type("text/xml");
