@@ -49,7 +49,6 @@ app.use(express.static(__dirname + "/public"));
 // Generate a Twilio Client capability token
 app.get("/token/:officeId/:sid/:token/:sid_token", (request, response) => {
   const { officeId } = request.params;
-  console.log("TOKEN ROUTE HIT");
   try {
     const capability = new ClientCapability({
       accountSid: request.params.sid,
@@ -71,6 +70,7 @@ app.get("/token/:officeId/:sid/:token/:sid_token", (request, response) => {
       token: token,
     });
   } catch (e) {
+    console.log("TOKEN ROUTE ERROR", e);
     response.send(e);
   }
 });
