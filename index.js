@@ -4,7 +4,6 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 
-const http = require("http");
 const express = require("express");
 const { urlencoded } = require("body-parser");
 const twilio = require("twilio");
@@ -233,9 +232,8 @@ app.post("/recording", upload.any(), (request, response) => {
   response.send(200);
 });
 
-let server = http.createServer(app);
 let port = process.env.PORT || 3001;
-server.listen(port, () => {
+app.listen(port, () => {
   console.log(`Express Server listening on ${port}`);
 });
 
