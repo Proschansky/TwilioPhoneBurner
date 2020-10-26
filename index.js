@@ -49,6 +49,7 @@ app.use(express.static(__dirname + "/public"));
 
 // Generate a Twilio Client capability token
 app.get("/token/:officeId/:sid/:token/:sid_token", (request, response) => {
+  console.log("ROUTE HIT", request.params);
   const { officeId } = request.params;
   console.log("OFFICE ID", officeId);
   try {
