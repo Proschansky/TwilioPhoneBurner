@@ -3,7 +3,7 @@
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
-require("dotenv").config();
+
 const http = require("http");
 const express = require("express");
 const { urlencoded } = require("body-parser");
@@ -47,6 +47,7 @@ app.use(express.static(__dirname + "/public"));
 
 // Generate a Twilio Client capability token
 app.get("/token/:officeId/:sid/:token/:sid_token", (request, response) => {
+  console.log("ROUTE HIT", request.params);
   const { officeId } = request.params;
   try {
     const capability = new ClientCapability({
