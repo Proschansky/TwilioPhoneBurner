@@ -46,6 +46,10 @@ app.use(cors());
 app.use(urlencoded({ extended: false }));
 app.use(express.static(__dirname + "/public"));
 
+app.get('/', (req, res)=>{
+  res.send("TWILIO PHONE BURNER IS LISTENING!");
+})
+
 // Generate a Twilio Client capability token
 app.get("/token/:officeId/:sid/:token/:sid_token", (request, response) => {
   console.log("ROUTE HIT", request.params);
