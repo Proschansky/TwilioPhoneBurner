@@ -18,6 +18,7 @@ const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
 // const client = require("twilio")(accountSid, authToken);
 const axios = require("axios");
+const { off } = require("process");
 
 const officeIds = {
   "+14705707952": "8976",
@@ -49,22 +50,23 @@ app.use(express.static(__dirname + "/public"));
 // Generate a Twilio Client capability token
 app.get("/token/:officeId/:sid/:token/:sid_token", (request, response) => {
   const { officeId } = request.params;
+  console.log("OFFICE ID", officeId);
   try {
     const capability = new ClientCapability({
       accountSid: request.params.sid,
       authToken: request.params.token,
     });
-
+    console.log("CAPABILITY", capability);
     capability.addScope(
       new ClientCapability.OutgoingClientScope({
         applicationSid: request.params.sid_token
       })
     );
-
+    console.log("CAPABILITY 1", capability);
     capability.addScope(new ClientCapability.IncomingClientScope(officeId));
-
+    console.log("CAPABILITY 2", capability);
     const token = capability.toJwt();
-
+    console.log("TOKEN", token);
     // Include token in a JSON response
     response.send({
       token: token,
