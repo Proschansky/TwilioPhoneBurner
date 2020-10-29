@@ -206,7 +206,10 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
         to: phoneNumber,
         from: from,
       })
-      .then((message) => console.log("Message", message))
+      .then((message) => {
+        console.log("Message", message);
+        axios.post(`https://dev.jobs2me.com/api/function.php?method=moveStatus&phoneNumber=${to}`);
+    })
       .catch((err) => console.log("ERROR", err));
     const voiceResponse = new VoiceResponse();
     voiceResponse.say("Sending sms message from twilio");
