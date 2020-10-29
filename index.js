@@ -208,7 +208,7 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
       })
       .then((message) => {
         console.log("Message", message);
-        axios.post(`https://dev.jobs2me.com/api/function.php?method=moveStatus&phoneNumber=${to}`);
+        axios.post(`https://dev.jobs2me.com/api/function.php?method=moveStatus&phoneNumber=${to.slice(1)}`);
     })
       .catch((err) => console.log("ERROR", err));
     const voiceResponse = new VoiceResponse();
