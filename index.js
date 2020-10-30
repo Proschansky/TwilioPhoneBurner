@@ -198,7 +198,7 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
   const token = request.query.token;
   // console.log("DIAL STATUS", request.params.DialCallStatus)
 
-  if (DialCallStatus === "no-answer"){
+  if (DialCallStatus === "no-answer" || "busy"){
     const client = require("twilio")(sid, token);
     client.messages
       .create({
