@@ -216,10 +216,10 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
     // const voiceResponse = new VoiceResponse();
     // voiceResponse.say("Sending sms message from twilio");
 
-    // setTimeout(() => {
-    //   response.type("text/xml");
-    //   response.send(voiceResponse.toString());
-    // }, 5000);
+    setTimeout(() => {
+      response.type("text/xml");
+      response.send(voiceResponse.toString());
+    }, 5000);
   } else {
     const voiceResponse = new VoiceResponse();
     voiceResponse.hangup();
