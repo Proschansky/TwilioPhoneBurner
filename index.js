@@ -200,6 +200,7 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
 
   if (DialCallStatus === "no-answer"){
     const client = require("twilio")(sid, token);
+    const voiceResponse = new VoiceResponse();
     voiceResponse.play("https://api.twilio.com/cowbell.mp3")
     // client.messages
     //   .create({
