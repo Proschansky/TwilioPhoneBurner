@@ -200,24 +200,25 @@ app.post("/sendMessage/:phoneNumber", (request, response) => {
 
   if (DialCallStatus === "no-answer"){
     const client = require("twilio")(sid, token);
-    client.messages
-      .create({
-        body: message,
-        to: phoneNumber,
-        from: from,
-      })
-      .then((message) => {
-        console.log("Message", message);
-        axios.post(`https://dev.jobs2me.com/api/function.php?method=moveStatus&phoneNumber=${to.slice(1)}`);
-    })
-      .catch((err) => console.log("ERROR", err));
-    const voiceResponse = new VoiceResponse();
-    voiceResponse.say("Sending sms message from twilio");
+    voiceResponse.play("https://api.twilio.com/cowbell.mp3")
+    // client.messages
+    //   .create({
+    //     body: message,
+    //     to: phoneNumber,
+    //     from: from,
+    //   })
+    //   .then((message) => {
+    //     console.log("Message", message);
+    //     axios.post(`https://dev.jobs2me.com/api/function.php?method=moveStatus&phoneNumber=${to.slice(1)}`);
+    // })
+    //   .catch((err) => console.log("ERROR", err));
+    // const voiceResponse = new VoiceResponse();
+    // voiceResponse.say("Sending sms message from twilio");
 
-    setTimeout(() => {
-      response.type("text/xml");
-      response.send(voiceResponse.toString());
-    }, 5000);
+    // setTimeout(() => {
+    //   response.type("text/xml");
+    //   response.send(voiceResponse.toString());
+    // }, 5000);
   } else {
     const voiceResponse = new VoiceResponse();
     voiceResponse.hangup();
