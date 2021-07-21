@@ -1,9 +1,5 @@
 "use strict";
 
-if (process.env.NODE_ENV !== "production") {
-  require("dotenv").config();
-}
-
 const express = require("express");
 const { urlencoded } = require("body-parser");
 const twilio = require("twilio");
@@ -13,9 +9,9 @@ const cors = require("cors");
 const multer = require("multer");
 const upload = multer();
 const fs = require("fs");
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-// const client = require("twilio")(accountSid, authToken);
+const accountSid = 'ACcf2c6c3fbeaec5d92a7ef88bf92ce8dc';
+const authToken = 'c4825524a36e38d0a825f66cea34af9a';
+const client = require("twilio")(accountSid, authToken);
 const axios = require("axios");
 const { off } = require("process");
 
@@ -50,72 +46,20 @@ app.get('/ping', (req, res)=>{
   res.send("TWILIO PHONE BURNER IS LISTENING!");
 });
 
-// Generate a Twilio Client capability token
-app.get("/token/:officeId/:sid/:token/:sid_token", (request, response) => {
-  console.log("ROUTE HIT", request.params);
-  const { officeId } = request.params;
-  console.log("OFFICE ID", officeId);
-  try {
-    const capability = new ClientCapability({
-      accountSid: request.params.sid,
-      authToken: request.params.token,
-    });
-    console.log("CAPABILITY", capability);
-    capability.addScope(
-      new ClientCapability.OutgoingClientScope({
-        applicationSid: request.params.sid_token
-      })
-    );
-    console.log("CAPABILITY 1", capability);
-    capability.addScope(new ClientCapability.IncomingClientScope(officeId));
-    console.log("CAPABILITY 2", capability);
-    const token = capability.toJwt();
-    console.log("TOKEN", token);
-    // Include token in a JSON response
-    response.send({
-      token: token,
-    });
-  } catch (e) {
-    console.log("TOKEN ROUTE ERROR", e);
-    response.send(e);
-  }
-});
-
-app.post("/incoming", async (request, response) => {
-  // axios.post('https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRoute.php', request.body);
-  const To = request.body.To.slice(1);
-  const From = request.body.From.slice(1);
-
-  console.log("To", To, "From", From);
-
-  const callerName = await axios
-    .get(
-      `https://recruiter.jobs2me.com/v2/process/phoneburner/incomingRouteGet.php?twilioNumber=${To}&callFrom=${From}`
-    )
-    .then((res) => {
-      return res.data.callerName;
-    });
-
-  // await axios.get('https://recruiter.jobs2me.com/v2/nav/topnav.php?fyIHpQ5JgI4NtWgOMvwe');
-
-  console.log("CALLER NAME", callerName);
+app.post("/incoming", (request, response) => {
 
   try {
     const twiml = new VoiceResponse();
-    const dial = twiml.dial({
-      action: "https://twiliophoneburner.herokuapp.com/voiceMail",
+    
+    twiml.say("We live bitches! Please say a short message about the nature of this call.");
+
+    twiml.record({
+      timeout: 30,
+      transcribe: true,
+      transcribeCallback: '/push',
+      action: '/continue'
     });
 
-    let client = dial.client(
-      {
-        statusCallbackEvent: "initiated ringing answered completed",
-        statusCallback: "https://twiliophoneburner.herokuapp.com/callStatus",
-        statusCallbackMethod: "POST",
-      },
-      officeIds[request.body.To]
-    );
-
-    client.parameter({ callerName: callerName });
     // Render the response as XML in reply to the webhook request
     response.type("text/xml");
     response.send(twiml.toString());
@@ -124,114 +68,41 @@ app.post("/incoming", async (request, response) => {
   }
 });
 
-app.post("/api/handlerFail", (request, response) => {
-  console.log("FAILED", request.body)
-})
+app.post("/push", (request, response) => {
 
-//Handles incoming call voice mail.
-app.post("/voiceMail", (request, response) => {
-  console.log("VOICEMAIL REQUEST", request.body);
   try {
-    axios
-      .post(
-        "https://recruiter.jobs2me.com/v2/process/twilio/route.php?method=missedCall",
-        request.body
-      )
-      .then((res) => console.log("VOICEMAIL POSTED", res.data));
-    if (request.body.DialCallStatus === "no-answer" || "busy") {
-      const twiml = new VoiceResponse();
-      twiml.say(
-        "Please leave a message at the beep. Press the star key when finished."
-      );
-      twiml.record({
-        timeout: 20,
-      });
-      twiml.hangup();
-      response.type("text/xml");
-      response.send(twiml.toString());
-    }
-  } catch(e){
-    console.log("ERROR IN VOICEMAIL", e);
+    // TODO: figure out how transcript comes in (assuming it's request)
+    const transcription = request.body.TranscriptionStatus == 'failed' ? "No transcript available" : request.body.TranscriptionText;
+    console.log(transcription)
+
+    // TODO: send push notification to callee
+
+  } catch(e) {
+    console.log("ERROR IN PUSH NOTIFICATION", e);
   }
 });
 
 // Create TwiML for outbound calls
 app.post("/voice", (request, response) => {
-  console.log("VOICE REQUEST BODY", request.body);
-  let message = encodeURIComponent(request.body.message);
-  let from = encodeURIComponent(request.body.from);
-  let sid = encodeURIComponent(request.body.sid);
-  let token = encodeURIComponent(request.body.token);
+  // voiceResponse = new VoiceResponse();
+
+  // voiceResponse.say("Hello, World!")
 
   try {
-    const voiceResponse = new VoiceResponse();
-    voiceResponse.dial(
-      {
-        action: `https://twiliophoneburner.herokuapp.com/sendMessage/${request.body.number}%20?message=${message}&from=${from}&sid=${sid}&token=${token}`,
-        method: "POST",
-        message: request.body.message,
-        callerId: request.body.from,
-        timeout: 10,
-      },
-      request.body.number
-    );
+    client.calls
+      .create({
+         url: 'http://demo.twilio.com/docs/voice.xml',
+         to: '+16105688542',
+         from: '+18327865719'
+       })
+      .then(call => console.log(call.sid));
     response.type("text/xml");
-    response.send(voiceResponse.toString());
+    response.sendStatus(200);
   } catch (e) {
     console.log("ERROR", e);
   }
 });
 
-app.post("/callStatus", (request, response) => {
-  console.log("REQUEST BODY", request.body);
-  response.end();
-});
-
-app.post("/sendMessage/:phoneNumber", (request, response) => {
-  console.log("ROUTE HIT", request.params);
-  const { phoneNumber } = request.params;
-  const { DialCallStatus } = request.body;
-  console.log("SEND MESSAGE REQUEST QUERY", request.query);
-  const message = request.query.message;
-  const from = request.query.from;
-  const sid = request.query.sid;
-  const token = request.query.token;
-  // console.log("DIAL STATUS", request.params.DialCallStatus)
-
-  if (DialCallStatus === "no-answer"){
-    const client = require("twilio")(sid, token);
-    const voiceResponse = new VoiceResponse();
-    voiceResponse.play("https://api.twilio.com/cowbell.mp3")
-    // client.messages
-    //   .create({
-    //     body: message,
-    //     to: phoneNumber,
-    //     from: from,
-    //   })
-    //   .then((message) => {
-    //     console.log("Message", message);
-    //     axios.post(`https://dev.jobs2me.com/api/function.php?method=moveStatus&phoneNumber=${to.slice(1)}`);
-    // })
-    //   .catch((err) => console.log("ERROR", err));
-    // const voiceResponse = new VoiceResponse();
-    // voiceResponse.say("Sending sms message from twilio");
-
-    setTimeout(() => {
-      response.type("text/xml");
-      response.send(voiceResponse.toString());
-    }, 5000);
-  } else {
-    const voiceResponse = new VoiceResponse();
-    voiceResponse.hangup();
-    response.type("text/xml");
-    response.send(voiceResponse.toString());
-  }
-});
-
-app.post("/message", (request, response) => {
-  message = request.body.message;
-  response.sendStatus(200);
-});
 
 app.post("/recording", upload.any(), (request, response) => {
   console.log("REQUEST FILES", request.files);
