@@ -14,6 +14,7 @@ const authToken = process.env.TWILIO_ACCOUNT_TOKEN;
 const client = require("twilio")(accountSid, authToken);
 const axios = require("axios");
 const { off } = require("process");
+const { request } = require("express");
 
 const officeIds = {
   "+14705707952": "8976",
@@ -71,7 +72,7 @@ app.post("/incoming", (request, response) => {
 app.post("/push", (request, response) => {
 
   try {
-    // TODO: figure out how transcript comes in (assuming it's request)
+    // TODO: figure out how transcript comes in (assuming it's request body)
     const transcription = request.body.TranscriptionStatus == 'failed' ? "No transcript available" : request.body.TranscriptionText;
     console.log(transcription)
 
@@ -79,7 +80,22 @@ app.post("/push", (request, response) => {
 
   } catch(e) {
     console.log("ERROR IN PUSH NOTIFICATION", e);
-  }
+  };
+});
+
+app.post("/continue", (request, response) => {
+  
+  // TODO: write out call after push notification has been sent out.
+
+  try {
+
+    // if call is accepted, connect call
+
+      // else, send end call response
+
+  } catch (e) {
+    console.log("ERROR IN CALL CONTINUATION", e)
+  };
 });
 
 // Create TwiML for outbound calls
