@@ -73,21 +73,23 @@ app.post("/continue", (request, response) => {
   
   // TODO: play autdo recording to callee, give option to accept or decline (input from front end?)
   const message = request.body.RecordingUrl
-  
   try {
-    // if call is accepted, connect call
+    // by default play the recording
     const response = new VoiceResponse();
     response.play(message);
-    client.calls.create({
-      url: 'http://demo.twilio.com/docs/voice.xml',
-      to: '+16105688542',
-      from: '+18327865719'
-    })
-    console.log(response.toString());
-
-
-      // else, send end call response
-
+    // TODO: handle call accept/reject statement
+    // If call is accepted, connect call
+    if ("something" === "accept") {
+      client.calls.create({
+        url: 'http://demo.twilio.com/docs/voice.xml',
+        to: '+16105688542',
+        from: '+18327865719'
+      })
+      console.log(response.toString());
+    } else {
+        // else, send end call response
+        response.hangup();
+    };
   } catch (e) {
     console.log("ERROR IN CALL CONTINUATION", e)
   };
