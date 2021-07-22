@@ -55,9 +55,8 @@ app.post("/incoming", (request, response) => {
     twiml.say("We live bitches! Please say a short message about the nature of this call.");
 
     twiml.record({
-      timeout: 30,
-      transcribe: true,
-      transcribeCallback: '/push',
+      timeout: 10,
+      maxLength: 30,
       action: '/continue'
     });
 
@@ -69,27 +68,23 @@ app.post("/incoming", (request, response) => {
   }
 });
 
-app.post("/push", (request, response) => {
-
-  try {
-    // TODO: figure out how transcript comes in (assuming it's request body)
-    const transcription = request.body.TranscriptionStatus == 'failed' ? "No transcript available" : request.body.TranscriptionText;
-    console.log(transcription)
-
-    // TODO: send push notification to callee
-
-  } catch(e) {
-    console.log("ERROR IN PUSH NOTIFICATION", e);
-  };
-});
 
 app.post("/continue", (request, response) => {
   
-  // TODO: write out call after push notification has been sent out.
-
+  // TODO: play autdo recording to callee, give option to accept or decline (input from front end?)
+  const message = request.body.RecordingUrl
+  
   try {
-
     // if call is accepted, connect call
+    const response = new VoiceResponse();
+    response.play(message);
+    client.calls.create({
+      url: 'http://demo.twilio.com/docs/voice.xml',
+      to: '+16105688542',
+      from: '+18327865719'
+    })
+    console.log(response.toString());
+
 
       // else, send end call response
 

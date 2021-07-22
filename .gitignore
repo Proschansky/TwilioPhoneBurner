@@ -46,7 +46,7 @@ jspm_packages
 *.tgz
 
 # .env file
-.env
+*.env
 
 #Store.js with personal data
 # frontend/src/Store.js
