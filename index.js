@@ -1,5 +1,6 @@
 "use strict";
 
+require('dotenv').config();
 const express = require("express");
 const { urlencoded } = require("body-parser");
 const twilio = require("twilio");
@@ -9,6 +10,7 @@ const cors = require("cors");
 const multer = require("multer");
 const upload = multer();
 const fs = require("fs");
+// TODO: need to set gcloud env variables instead of using .env file. add ENV KEY1=sid, etc. to dockerfile
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_ACCOUNT_TOKEN;
 const client = require("twilio")(accountSid, authToken);
@@ -79,17 +81,12 @@ app.post("/continue", (request, response) => {
     response.play(message);
     // TODO: handle call accept/reject statement
     // If call is accepted, connect call
-    if ("something" === "accept") {
-      client.calls.create({
-        url: 'http://demo.twilio.com/docs/voice.xml',
-        to: '+16105688542',
-        from: '+18327865719'
-      })
-      console.log(response.toString());
-    } else {
-        // else, send end call response
-        response.hangup();
-    };
+    const gather = response.gather({
+      input: 'dtmf',
+      action: '/voice'
+    })
+
+    gather.say('Would you like to accept this call?')
   } catch (e) {
     console.log("ERROR IN CALL CONTINUATION", e)
   };
@@ -97,33 +94,35 @@ app.post("/continue", (request, response) => {
 
 // Create TwiML for outbound calls
 app.post("/voice", (request, response) => {
-  // voiceResponse = new VoiceResponse();
-
-  // voiceResponse.say("Hello, World!")
+  response = new VoiceResponse();
 
   try {
-    client.calls
-      .create({
-         url: 'http://demo.twilio.com/docs/voice.xml',
-         to: '+16105688542',
-         from: '+18327865719'
-       })
-      .then(call => console.log(call.sid));
-    response.type("text/xml");
-    response.sendStatus(200);
+    if (request.body === '1') {
+      client.calls
+        .create({
+           url: 'http://demo.twilio.com/docs/voice.xml',
+           to: '+16105688542',
+           from: '+18327865719'
+         })
+        .then(call => console.log(call.sid));
+      response.type("text/xml");
+      response.sendStatus(200);
+    } else {
+      response.hangup();
+    }
   } catch (e) {
     console.log("ERROR", e);
   }
 });
 
 
-app.post("/recording", upload.any(), (request, response) => {
-  console.log("REQUEST FILES", request.files);
-  fs.writeFile("./recording.webm", request.files.buffer, function (e) {
-    if (e) console.log("fs.writeFile error " + e);
-  });
-  response.send(200);
-});
+// app.post("/recording", upload.any(), (request, response) => {
+//   console.log("REQUEST FILES", request.files);
+//   fs.writeFile("./recording.webm", request.files.buffer, function (e) {
+//     if (e) console.log("fs.writeFile error " + e);
+//   });
+//   response.send(200);
+// });
 
 let port = process.env.PORT || 3001;
 app.listen(port, () => {
