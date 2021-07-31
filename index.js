@@ -1,5 +1,6 @@
 "use strict";
 
+
 require('dotenv').config();
 const express = require("express");
 const { urlencoded } = require("body-parser");
@@ -11,8 +12,8 @@ const multer = require("multer");
 const upload = multer();
 const fs = require("fs");
 // TODO: need to set gcloud env variables instead of using .env file. add ENV KEY1=sid, etc. to dockerfile
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_ACCOUNT_TOKEN;
+const accountSid = '';
+const authToken = ''
 const client = require("twilio")(accountSid, authToken);
 const axios = require("axios");
 const { off } = require("process");
@@ -30,35 +31,35 @@ const allowCrossDomain = function (req, res, next) {
   res.header(
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization, Content-Length, X-Requested-With"
-  );
-
-  // intercept OPTIONS method
-  if ("OPTIONS" == req.method) {
-    res.send(200);
-  } else {
-    next();
-  }
-};
-
-let app = express();
-app.use(cors());
-app.use(urlencoded({ extended: false }));
-app.use(express.static(__dirname + "/public"));
-
-app.get('/ping', (req, res)=>{
-  res.send("TWILIO PHONE BURNER IS LISTENING!");
-});
-
-app.post("/incoming", (request, response) => {
-
-  try {
-    const twiml = new VoiceResponse();
+    );
+    
+    // intercept OPTIONS method
+    if ("OPTIONS" == req.method) {
+      res.send(200);
+    } else {
+      next();
+    }
+  };
+  
+  let app = express();
+  app.use(cors());
+  app.use(urlencoded({ extended: false }));
+  app.use(express.static(__dirname + "/public"));
+  
+  app.get('/ping', (req, res)=>{
+    res.send("TWILIO PHONE BURNER IS LISTENING!");
+  });
+  
+  app.post("/incoming", (request, response) => {
+    
+    try {
+      const twiml = new VoiceResponse();
     
     twiml.say("We live bitches! Please say a short message about the nature of this call.");
 
     twiml.record({
       timeout: 10,
-      maxLength: 30,
+      maxLength: 60,
       action: '/continue'
     });
 
@@ -78,7 +79,13 @@ app.post("/continue", (request, response) => {
   try {
     // by default play the recording
     const response = new VoiceResponse();
-    response.play(message);
+    client.calls
+    .create({
+       twiml: '<Response><Play loop="10">' + message + '</Play></Response>',
+       to: '+16105688542',
+       from: '+18327865719'
+     })
+    //response.play(message);
     // TODO: handle call accept/reject statement
     // If call is accepted, connect call
     const gather = response.gather({

@@ -1,0 +1,13 @@
+steps:
+- name: node:10.15.1
+  entrypoint: npm
+  args: ["install"]
+- name: node:10.15.1
+  entrypoint: npm
+  args: ["run", "create-env"]
+  env:
+    - 'TWILIO_ACCOUNT_SID=${_TWILIO_ACCOUNT_SID}'
+    - 'TWILIO_ACCOUNT_TOKEN=${_TWILIO_ACCOUNT_TOKEN}'
+- name: "gcr.io/cloud-builders/gcloud"
+  args: ["app", "deploy"]
+timeout: "1600s"
