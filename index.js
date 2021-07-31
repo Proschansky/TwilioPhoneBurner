@@ -59,7 +59,7 @@ const allowCrossDomain = function (req, res, next) {
 
     twiml.record({
       timeout: 10,
-      maxLength: 60,
+      maxLength: 10,
       action: '/continue'
     });
 
@@ -74,14 +74,14 @@ const allowCrossDomain = function (req, res, next) {
 
 app.post("/continue", (request, response) => {
   
-  // TODO: play autdo recording to callee, give option to accept or decline (input from front end?)
+  // TODO: give option to accept or decline, figure out how to use gather inside of client.calls.create
   const message = request.body.RecordingUrl
   try {
     // by default play the recording
     const response = new VoiceResponse();
     client.calls
     .create({
-       twiml: '<Response><Play loop="10">' + message + '</Play></Response>',
+       twiml: "<Response><Play>" + message + "</Play><Gather input='dtmf' action='https://twilio-phone-burner-4dgbzfempa-uc.a.run.app/voice'><Say>Press 1 to accept this call</Say></Gather></Response>",
        to: '+16105688542',
        from: '+18327865719'
      })
@@ -107,7 +107,7 @@ app.post("/voice", (request, response) => {
     if (request.body === '1') {
       client.calls
         .create({
-           url: 'http://demo.twilio.com/docs/voice.xml',
+           //url: 'http://demo.twilio.com/docs/voice.xml',
            to: '+16105688542',
            from: '+18327865719'
          })
