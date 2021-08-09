@@ -12,8 +12,8 @@ const multer = require("multer");
 const upload = multer();
 const fs = require("fs");
 // TODO: need to set gcloud env variables instead of using .env file. add ENV KEY1=sid, etc. to dockerfile
-const accountSid = '';
-const authToken = ''
+const accountSid = 'ACcf2c6c3fbeaec5d92a7ef88bf92ce8dc';
+const authToken = '9df529bfc531098fe5deb6251957d920'
 const client = require("twilio")(accountSid, authToken);
 const axios = require("axios");
 const { off } = require("process");
@@ -94,7 +94,7 @@ app.post("/notify", (request, response) => {
 // Create TwiML for outbound calls
 app.post("/wait", (request, response) => {
   try {
-    // const response = new VoiceResponse();
+    const response = new VoiceResponse();
     const dial = response.dial();
     console.log(request.body)
     dial.enqueue({
@@ -107,9 +107,14 @@ app.post("/wait", (request, response) => {
 });
 
 app.post("/music", (request, response) => {
-  // const response = new VoiceResponse
-  response.play('http://com.twilio.sounds.music.s3.amazonaws.com/MARKOVICHAMP-Borghestral.mp3');
-})
+  try{
+    const response = new VoiceResponse();
+    response.play('http://com.twilio.sounds.music.s3.amazonaws.com/MARKOVICHAMP-Borghestral.mp3');
+  } catch (e) {
+      console.log("ERROR in wait", e);
+  }
+  })
+
 
 app.post("/connect", (request, response) => {
   // const response = new VoiceResponse();
