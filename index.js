@@ -121,12 +121,12 @@ app.post("/music", (request, response) => {
 
 
 app.post("/connect", (request, response) => {
-  console.log(response.body)
+  console.log(response.body, request.body)
   try{
     const res = new VoiceResponse();
     const dial = res.dial();
     res.say("Please wait while we connect you")
-    if (request.body === "1") {
+    if (request.body.Digits === "1") {
       dial.queue({
         url: 'connect.xml'
       }, 'waiting')
