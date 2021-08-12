@@ -85,7 +85,8 @@ app.post("/notify", (request, response) => {
         from: '+18327865719'
       })
     
-   
+      response.type('text/xml');
+      response.send(res.toString());
   } catch (e) {
     console.log("ERROR IN CALL CONTINUATION", e)
   };
@@ -96,12 +97,12 @@ app.post("/wait", (request, response) => {
   console.log(response.body)
   try {
     const res = new VoiceResponse();
-    const dial = res.dial();
     console.log(request.body)
-    dial.enqueue({
-      waitUrl: 'music.xml'
+    res.enqueue({
+      waitUrl: '/music'
     }, 'waiting')
-
+    response.type('text/xml');
+    response.send(res.toString());
   } catch (e) {
     console.log("ERROR", e);
   }
@@ -111,6 +112,8 @@ app.post("/music", (request, response) => {
   try{
     const res = new VoiceResponse();
     res.play('http://com.twilio.sounds.music.s3.amazonaws.com/MARKOVICHAMP-Borghestral.mp3');
+    response.type('text/xml');
+    response.send(res.toString());
   } catch (e) {
       console.log("ERROR in wait", e);
   }
@@ -121,14 +124,18 @@ app.post("/connect", (request, response) => {
   console.log(response.body)
   try{
     const res = new VoiceResponse();
+    const dial = res.dial();
     res.say("Please wait while we connect you")
     if (request.body === "1") {
-      res.dial(request.body.Caller)
+      dial.queue({
+        url: 'connect.xml'
+      }, 'waiting')
     } else {
       res.say('Sorry, we could not complete your call')
       res.hangup();
     }
-    response.send(200)
+    response.type('text/xml');
+    response.send(res.toString());
   } catch (e) {
     console.log("ERROR", e);
   }
