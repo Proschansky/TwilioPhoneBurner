@@ -12,6 +12,7 @@
   "author": "Sam Proschansky",
   "license": "MIT",
   "dependencies": {
+    "@google-cloud/firestore": "^4.15.0",
     "body-parser": "^1.15.2",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",

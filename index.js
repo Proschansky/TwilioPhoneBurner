@@ -12,12 +12,13 @@ const multer = require("multer");
 const upload = multer();
 const fs = require("fs");
 // TODO: need to set gcloud env variables instead of using .env file. add ENV KEY1=sid, etc. to dockerfile
-const accountSid = '';
-const authToken = ''
+const accountSid = 'ACcf2c6c3fbeaec5d92a7ef88bf92ce8dc';
+const authToken = 'eaec12ed300c3d1509c1510e6d5b7bf7'
 const client = require("twilio")(accountSid, authToken);
 const axios = require("axios");
 const { off } = require("process");
-const { request } = require("express");
+const { request, response } = require("express");
+const db = require('./database.js');
 
 const allowCrossDomain = function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -128,7 +129,7 @@ app.post("/connect", (request, response) => {
     res.say("Please wait while we connect you")
     if (request.body.Digits === "1") {
       dial.queue({
-        url: 'connect.xml'
+        url: '/aboutToConnect'
       }, 'waiting')
     } else {
       res.say('Sorry, we could not complete your call')
@@ -141,7 +142,14 @@ app.post("/connect", (request, response) => {
   }
 })
 
-
+app.post("/aboutToConnect", (request, response) => {
+  try {
+    const res = new VoiceResponse();
+    res.say("Connecting your call")
+  } catch (e) {
+    console.log("Error", e);
+  }
+});
 // app.post("/recording", upload.any(), (request, response) => {
 //   console.log("REQUEST FILES", request.files);
 //   fs.writeFile("./recording.webm", request.files.buffer, function (e) {
