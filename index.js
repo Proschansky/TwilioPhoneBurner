@@ -12,8 +12,8 @@ const multer = require("multer");
 const upload = multer();
 const fs = require("fs");
 // TODO: need to set gcloud env variables instead of using .env file. add ENV KEY1=sid, etc. to dockerfile
-const accountSid = 'ACcf2c6c3fbeaec5d92a7ef88bf92ce8dc';
-const authToken = 'eaec12ed300c3d1509c1510e6d5b7bf7'
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_ACCOUNT_TOKEN;
 const client = require("twilio")(accountSid, authToken);
 const axios = require("axios");
 const { off } = require("process");
@@ -44,6 +44,15 @@ const allowCrossDomain = function (req, res, next) {
   app.get('/ping', (req, res)=>{
     res.send("TWILIO PHONE BURNER IS LISTENING!");
   });
+
+  app.post("/addUser", (request, response) => {
+    try{
+      userObject = request.body
+      db.setData(userObject)
+    } catch (e) {
+      console.log("ERROR POSTING TO DB", e);
+    }
+  })
   
   app.post("/incoming", (request, response) => {
     

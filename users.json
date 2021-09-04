@@ -1,0 +1,20 @@
+{
+    "company" : "Random Co.",
+    "users" : [{
+        "email" : "samproschansky@gmail.com",
+        "password" : "password123",
+        "whitelist" : [],
+        "otherNumbers" : [],
+        "calls" : [{
+            "number" : "+11234567890",
+            "whiteList" : false,
+            "date" : "1519211809934"
+        },
+        {
+            "number" : "+10987654321",
+            "whiteList" : true,
+            "date" : "1519211809935"
+        }
+    ]
+    }]
+}
