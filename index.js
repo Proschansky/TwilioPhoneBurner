@@ -12,8 +12,13 @@ const multer = require("multer");
 const upload = multer();
 const fs = require("fs");
 // TODO: need to set gcloud env variables instead of using .env file. add ENV KEY1=sid, etc. to dockerfile
+<<<<<<< HEAD
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_ACCOUNT_TOKEN;
+=======
+const accountSid = '';
+const authToken = ''
+>>>>>>> 75f3070cfe7387fde4874591e74dda645af51f1d
 const client = require("twilio")(accountSid, authToken);
 const axios = require("axios");
 const { off } = require("process");
