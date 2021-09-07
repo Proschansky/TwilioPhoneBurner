@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "test": "./node_modules/.bin/eslint . && NODE_ENV=test TWILIO_ACCOUNT_SID=my-account-sid TWILIO_AUTH_TOKEN=my-auth-token TWILIO_NUMBER=my-twilio-number TWILIO_TWIML_APP_SID=app-sid ./node_modules/mocha/bin/mocha spec --recursive",
-    "create-env": "printenv > .env"
+    "create-env": "printenv > .env",
+    "dev": "nodemon index.js"
   },
   "engineStrict": true,
   "author": "Sam Proschansky",

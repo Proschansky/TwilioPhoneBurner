@@ -14,17 +14,17 @@ const firebaseConfig = {
     measurementId: process.env.measurementId
 };
 Firebase.initializeApp(firebaseConfig);
-const database = Firebase.database().ref()
-
-// const companies = database.collection('cka-course-312717-default-rtdb').doc('company')
-
+const database = Firebase.database().ref('"company"/users')
+console.log(database)
 const getData = (data) => {
-    if (!database.exsits) {
-        console.log('No document');
-    } else {
-        database.where('company', '==' , data).get('users');
-        console.log(database.data())
-    }
+    console.log(data);
+    database.on('value', snap => {
+        if (snap.exists()) {
+            console.log(snap.val())
+        } else {
+            console.log("No Document")
+        }
+    });
 }
 
 

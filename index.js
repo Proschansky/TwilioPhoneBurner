@@ -45,12 +45,17 @@ const allowCrossDomain = function (req, res, next) {
     res.send("TWILIO PHONE BURNER IS LISTENING!");
   });
 
-  app.post("/addUser", (request, response) => {
+  app.get("/getUser", (request, response) => {
     try{
-      userObject = request.body
-      db.setData(userObject)
+      console.log(request.body);
+      let username = "samproschansky@gmail.com";
+      let company = "Random Co."
+      let dbName = "cka-course-312717-default-rtdb"
+      db.getData(company);
+      response.sendStatus(200);
     } catch (e) {
-      console.log("ERROR POSTING TO DB", e);
+      console.log("ERROR GETTING USER FROM DB", e);
+      response.sendStatus(400);
     }
   })
   
