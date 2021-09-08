@@ -44,24 +44,33 @@ const allowCrossDomain = function (req, res, next) {
   app.get('/ping', (req, res)=>{
     res.send("TWILIO PHONE BURNER IS LISTENING!");
   });
-
-  app.get("/getUser", (request, response) => {
-    try{
-      console.log(request.body);
-      let username = "samproschansky@gmail.com";
-      let company = "Random Co."
-      let dbName = "cka-course-312717-default-rtdb"
-      db.getData(company);
-      response.sendStatus(200);
-    } catch (e) {
-      console.log("ERROR GETTING USER FROM DB", e);
-      response.sendStatus(400);
-    }
+  
+  var currentNumber;
+  client.incomingPhoneNumbers()
+  .fetch()
+  .then(incoming => {
+    currentNumber = incoming.phone_number;
+    console.log(incoming)
   })
+
+  // app.get("/getUser", (request, response) => {
+  //   try{
+  //     console.log(request.body);
+  //     let username = "samproschansky@gmail.com";
+  //     let company = "Random Co."
+  //     let dbName = "cka-course-312717-default-rtdb"
+  //     db.getData(company);
+  //     response.sendStatus(200);
+  //   } catch (e) {
+  //     console.log("ERROR GETTING USER FROM DB", e);
+  //     response.sendStatus(400);
+  //   }
+  // })
   
   app.post("/incoming", (request, response) => {
     
     try {
+
       const twiml = new VoiceResponse();
     
       twiml.say("We live bitches! Please say a short message about the nature of this call.");
