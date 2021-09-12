@@ -13,6 +13,7 @@
   "author": "Sam Proschansky",
   "license": "MIT",
   "dependencies": {
+    "@google-cloud/secret-manager": "^3.10.1",
     "body-parser": "^1.15.2",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
