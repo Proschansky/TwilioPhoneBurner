@@ -1,3 +1,4 @@
+const { response } = require('express');
 const Firebase = require('firebase-admin');
 require('firebase/auth');
 require('firebase/app');
@@ -14,13 +15,16 @@ const firebaseConfig = {
     measurementId: process.env.measurementId
 };
 Firebase.initializeApp(firebaseConfig);
-const database = Firebase.database().ref('"company"/users')
-console.log(database)
+const database = Firebase.database().ref("numbers/")
+
+// gets numbers array from firebase
 const getData = (data) => {
-    console.log(data);
-    database.on('value', snap => {
+    // console.log(data);
+    database.once('value', (snap) => {
         if (snap.exists()) {
-            console.log(snap.val())
+          let doc = snap.val()[0].numbers;
+          response.status(200).send(doc)
+          console.log(doc);
         } else {
             console.log("No Document")
         }

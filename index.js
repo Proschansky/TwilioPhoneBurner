@@ -17,7 +17,24 @@ const client = require("twilio")(accountSid, authToken);
 const axios = require("axios");
 const { off } = require("process");
 const { request, response } = require("express");
-const db = require('./database.js');
+// const db = require('./database.js');
+const Firebase = require('firebase-admin');
+require('firebase/auth');
+require('firebase/app');
+
+
+const firebaseConfig = {
+  apiKey: process.env.apiKey,
+  authDomain: process.env.authDomain,
+  databaseURL: process.env.databaseURL,
+  projectId: process.env.projectId,
+  storageBucket: process.env.storageBucket,
+  messagingSenderId: process.env.messagingSenderId,
+  appId: process.env.appId,
+  measurementId: process.env.measurementId
+};
+Firebase.initializeApp(firebaseConfig);
+const database = Firebase.database().ref("numbers/")
 
 const allowCrossDomain = function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -36,6 +53,7 @@ const allowCrossDomain = function (req, res, next) {
   };
   
   let app = express();
+  app.use(express())
   app.use(cors());
   app.use(urlencoded({ extended: false }));
   app.use(express.static(__dirname + "/public"));
@@ -52,29 +70,64 @@ const allowCrossDomain = function (req, res, next) {
     console.log(incoming)
   })
 
-  // app.get("/getUser", (request, response) => {
-  //   try{
-  //     console.log(request.body);
-  //     let username = "samproschansky@gmail.com";
-  //     let company = "Random Co."
-  //     let dbName = "cka-course-312717-default-rtdb"
-  //     db.getData(company);
-  //     response.sendStatus(200);
-  //   } catch (e) {
-  //     console.log("ERROR GETTING USER FROM DB", e);
-  //     response.sendStatus(400);
-  //   }
-  // })
+
+  let numArray;
+  async function getData (data, res, req, next) {
+    // console.log(data);
+    database.once('value', (snap) => {
+        if (snap.exists()) {
+          req.doc = snap.val()[0].numbers;
+          console.log(req.doc)
+          next();
+          // response.status(200).json(doc)
+          // console.log(numArray);
+        } else {
+            console.log("No Document")
+        }
+    });
+    const isInWhiteList = (numbers) => {
+      numbers.forEach(element => {
+        if (element.whiteList.includes()) {
+          return true;
+        } else {
+          return false;
+        }
+      });
+    }
+  }
+
+  
+  
+  app.use(getData);
+  
+  
+  app.all("/getUser", (request, response, next) => {
+    
+    try{
+      // console.log(request.body);
+      let calledNum = "+12223338989"
+
+      numArray = getData(calledNum, response, request, next);
+
+      response.sendStatus(200)
+    } catch (e) {
+      console.log("ERROR GETTING USER FROM DB", e);
+      response.sendStatus(400);
+    }
+  })
   
   app.post("/incoming", (request, response) => {
+
+
     
     try {
 
       const twiml = new VoiceResponse();
+
+      
     
       twiml.say("We live bitches! Please say a short message about the nature of this call.");
     
-      //twiml.dial('610-568-8542')
       twiml.record({
         timeout: 10,
         maxLength: 10,
@@ -93,7 +146,6 @@ const allowCrossDomain = function (req, res, next) {
 
 app.post("/notify", (request, response) => {
   
-  // TODO: give option to accept or decline, figure out how to use gather inside of client.calls.create
   try {
     const res = new VoiceResponse();
     const message = request.body.RecordingUrl
@@ -172,13 +224,6 @@ app.post("/aboutToConnect", (request, response) => {
     console.log("Error", e);
   }
 });
-// app.post("/recording", upload.any(), (request, response) => {
-//   console.log("REQUEST FILES", request.files);
-//   fs.writeFile("./recording.webm", request.files.buffer, function (e) {
-//     if (e) console.log("fs.writeFile error " + e);
-//   });
-//   res.send(200);
-// });
 
 let port = process.env.PORT || 3001;
 app.listen(port, () => {
