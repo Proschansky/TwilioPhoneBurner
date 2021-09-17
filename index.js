@@ -19,6 +19,7 @@ const { off } = require("process");
 const { request, response } = require("express");
 // const db = require('./database.js');
 const Firebase = require('firebase-admin');
+const { registerVersion } = require('@firebase/app');
 require('firebase/auth');
 require('firebase/app');
 
@@ -70,21 +71,19 @@ const allowCrossDomain = function (req, res, next) {
     console.log(incoming)
   })
 
-
   let numArray;
+  
   async function getData (data, res, req, next) {
     // console.log(data);
-    database.once('value', (snap) => {
-        if (snap.exists()) {
-          req.doc = snap.val()[0].numbers;
-          console.log(req.doc)
-          next();
-          // response.status(200).json(doc)
-          // console.log(numArray);
-        } else {
-            console.log("No Document")
-        }
-    });
+      return await database.once('value', (snap) => {
+          if (snap.exists()) {
+            req.doc = JSON.stringify(snap.val()[0].numbers);
+            return req.doc
+          } else {
+              console.log("No Document")
+          }
+        })
+
     const isInWhiteList = (numbers) => {
       numbers.forEach(element => {
         if (element.whiteList.includes()) {
@@ -106,8 +105,24 @@ const allowCrossDomain = function (req, res, next) {
     try{
       // console.log(request.body);
       let calledNum = "+12223338989"
+      
 
-      numArray = getData(calledNum, response, request, next);
+      
+      getData(calledNum, response, request, next).then(data => {
+        console.log(data.val()[0].numbers)
+        numArray = data.val()[0].numbers
+        numArray.map((number) => {
+          if (number[calledNum] && number[calledNum].whiteList.includes("+18889997575")) {
+            console.log(true);
+            numArray = true
+            return numArray;
+          } else {
+            return false
+          }
+        })
+      })
+
+      
 
       response.sendStatus(200)
     } catch (e) {
@@ -116,28 +131,48 @@ const allowCrossDomain = function (req, res, next) {
     }
   })
   
-  app.post("/incoming", (request, response) => {
+  app.post("/incoming", (request, response, next) => {
 
-
-    
+    // console.log("from incoming", numArray)    
     try {
+
+
 
       const twiml = new VoiceResponse();
 
+        let calledNum = "+12223338989"
+        let caller = "+18889997575"
       
-    
-      twiml.say("We live bitches! Please say a short message about the nature of this call.");
-    
-      twiml.record({
-        timeout: 10,
-        maxLength: 10,
-        action: '/wait',
-        recordingStatusCallback: '/notify'
-      });
 
-      // Render the response as XML in reply to the webhook request
-      response.type("text/xml");
-      response.send(twiml.toString());
+      
+      getData(calledNum, response, request, next).then(data => {
+        console.log(data.val()[0].numbers)
+        numArray = data.val()[0].numbers
+        numArray.map((number) => {
+          if (number[calledNum] && !number[calledNum].whiteList.includes(caller)) {
+            console.log(number[calledNum], number[calledNum].whiteList);
+            // numArray = true
+            twiml.say("We live bitches! Please say a short message about the nature of this call.");
+          
+            twiml.record({
+              timeout: 10,
+              maxLength: 10,
+              action: '/wait',
+              recordingStatusCallback: '/notify'
+            });
+      
+            // Render the response as XML in reply to the webhook request
+            response.type("text/xml");
+            response.send(twiml.toString());
+            // return numArray;
+          } else if (number[calledNum] && number[calledNum].whiteList.includes(caller)) {
+            twiml.dial(calledNum)
+            response.type("text/xml")
+            response.send(twiml.toString())
+          }
+        })
+      }).catch(err => console.log(err))
+    
   } catch (e) {
     console.log("ERROR IN INCOMING CALL", e);
   }
