@@ -100,20 +100,23 @@ const allowCrossDomain = function (req, res, next) {
   app.use(getData);
   
   
-  app.all("/getUser", (request, response, next) => {
+  app.all("/getUser/:email", (request, response, next) => {
+
+    const { email } = request.params;
     
     try{
-      // console.log(request.body);
+      console.log(request.params['email']);
       let calledNum = "+12223338989"
-      
+      let email = "samproschansky@gmail.com"
 
       
       getData(calledNum, response, request, next).then(data => {
         console.log(data.val()[0].numbers)
         numArray = data.val()[0].numbers
         numArray.map((number) => {
-          if (number[calledNum] && number[calledNum].whiteList.includes("+18889997575")) {
+          if (number[calledNum] && number[calledNum].email === email) {
             console.log(true);
+            console.log(number[calledNum])
             numArray = true
             return numArray;
           } else {
