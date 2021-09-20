@@ -20,6 +20,7 @@ const { request, response } = require("express");
 // const db = require('./database.js');
 const Firebase = require('firebase-admin');
 const { registerVersion } = require('@firebase/app');
+const { async } = require('@firebase/util');
 require('firebase/auth');
 require('firebase/app');
 
@@ -83,51 +84,80 @@ const allowCrossDomain = function (req, res, next) {
               console.log("No Document")
           }
         })
+  }
 
-    const isInWhiteList = (numbers) => {
-      numbers.forEach(element => {
-        if (element.whiteList.includes()) {
-          return true;
-        } else {
-          return false;
+  async function setData (data, email, res, req) {
+    const db = Firebase.database()
+    const ref = db.ref("numbers/0")
+    await ref.child("numbers").once("value", (snap) => {
+      let numsArray = [];
+      let index = 0;
+      snap.forEach(() => {
+        numsArray.push(Object.keys(snap.val()[index])[0])
+        index++
+        console.log(numsArray)
+      })
+      numsArray.map(number => {
+        for (var i = 0; i < snap.val().length; i++) {
+          console.log(number)
+          console.log(snap.val()[i])
+          if (snap.val()[i][number] != undefined && snap.val()[i][number].email === email) {
+            ref.child("numbers/" + i + "/" + number).update({
+              whiteList: data.whiteListNum,
+              otherNumbers: data.otherNum
+            })
+          } 
         }
-      });
-    }
+      })
+    })
   }
 
   
   
-  app.use(getData);
+  app.use(getData, setData);
+
+  app.post("/addUser/:email", (request, response) => {
+    const { email } = request.params
+    const newData = /*reqest.body*/ {
+      whiteListNum: ["+19998889696", "+18889997575", "array", "of", "new", "numbers"],
+      otherNum: ["+18986663535", "+19876541212", "array of", "less numbers"]
+    }
+    try{
+      setData(newData, email, request, response).then(
+        response.sendStatus(200)
+      )
+    } catch (e) {
+      console.log("ERROR ADDING USER TO DB", e);
+      response.sendStatus(400);
+    }
+  })
   
   
-  app.all("/getUser/:email", (request, response, next) => {
+  app.get("/getUser/:email", (request, response, next) => {
 
     const { email } = request.params;
     
     try{
-      console.log(request.params['email']);
+      console.log(email);
       let calledNum = "+12223338989"
-      let email = "samproschansky@gmail.com"
+      // let email = "samproschansky@gmail.com"
 
       
       getData(calledNum, response, request, next).then(data => {
-        console.log(data.val()[0].numbers)
         numArray = data.val()[0].numbers
         numArray.map((number) => {
           if (number[calledNum] && number[calledNum].email === email) {
-            console.log(true);
             console.log(number[calledNum])
-            numArray = true
-            return numArray;
-          } else {
-            return false
+            response.send(number[calledNum])
+          } else if (number[calledNum] && number[calledNum].email != email) {
+            response.sendStatus(404)
           }
         })
       })
 
       
 
-      response.sendStatus(200)
+      // response.sendStatus(200)
     } catch (e) {
       console.log("ERROR GETTING USER FROM DB", e);
       response.sendStatus(400);
@@ -136,7 +166,6 @@ const allowCrossDomain = function (req, res, next) {
   
   app.post("/incoming", (request, response, next) => {
 
-    // console.log("from incoming", numArray)    
     try {
 
 
