@@ -75,7 +75,6 @@ const allowCrossDomain = function (req, res, next) {
   let numArray;
   
   async function getData (data, res, req, next) {
-    // console.log(data);
       return await database.once('value', (snap) => {
           if (snap.exists()) {
             req.doc = JSON.stringify(snap.val()[0].numbers);
@@ -95,37 +94,49 @@ const allowCrossDomain = function (req, res, next) {
       snap.forEach(() => {
         numsArray.push(Object.keys(snap.val()[index])[0])
         index++
-        console.log(numsArray)
       })
       numsArray.map(number => {
         for (var i = 0; i < snap.val().length; i++) {
-          console.log(number)
-          console.log(snap.val()[i])
           if (snap.val()[i][number] != undefined && snap.val()[i][number].email === email) {
+            console.log(data)
             ref.child("numbers/" + i + "/" + number).update({
-              whiteList: data.whiteListNum,
-              otherNumbers: data.otherNum
+              whiteList: JSON.parse(data.whiteListNum),
+              otherNumbers: JSON.parse(data.otherNum)
+            }).then(()=> {
+              console.log("DATA SAVED")
+              res.status(200).send("DATA SAVED")
+            }).catch(err => {
+              console.log("COULD NOT SAVE DATA", err)
+              res.status(400).send(err)
             })
-          } 
+          }
         }
       })
-    })
+    }).catch((err) => {
+        console.log(err)
+        res.status(400).send(err)
+      })
   }
 
   
   
   app.use(getData, setData);
 
-  app.post("/addUser/:email", (request, response) => {
+  app.put("/updateUser/:email", (request, response) => {
     const { email } = request.params
-    const newData = /*reqest.body*/ {
-      whiteListNum: ["+19998889696", "+18889997575", "array", "of", "new", "numbers"],
-      otherNum: ["+18986663535", "+19876541212", "array of", "less numbers"]
-    }
+    const newData = request.body
+    console.log("REQ.BODY", newData)
     try{
-      setData(newData, email, request, response).then(
-        response.sendStatus(200)
-      )
+      if (!(Object.keys(newData).length === 0 && newData.constructor === Object)) {
+        setData(newData, email, response, request).then(
+        ).catch((err) => {
+          console.log(err)
+          response.send(400)
+        })
+
+      } else {
+        response.status(400).send("REQUEST BODY IS EMPTY")
+      }
     } catch (e) {
       console.log("ERROR ADDING USER TO DB", e);
       response.sendStatus(400);
@@ -138,26 +149,19 @@ const allowCrossDomain = function (req, res, next) {
     const { email } = request.params;
     
     try{
-      console.log(email);
       let calledNum = "+12223338989"
-      // let email = "samproschansky@gmail.com"
 
       
       getData(calledNum, response, request, next).then(data => {
         numArray = data.val()[0].numbers
         numArray.map((number) => {
           if (number[calledNum] && number[calledNum].email === email) {
-            console.log(number[calledNum])
             response.send(number[calledNum])
           } else if (number[calledNum] && number[calledNum].email != email) {
             response.sendStatus(404)
           }
         })
       })
-
-      
-
-      // response.sendStatus(200)
     } catch (e) {
       console.log("ERROR GETTING USER FROM DB", e);
       response.sendStatus(400);
@@ -178,11 +182,8 @@ const allowCrossDomain = function (req, res, next) {
 
       
       getData(calledNum, response, request, next).then(data => {
-        console.log(data.val()[0].numbers)
-        numArray = data.val()[0].numbers
         numArray.map((number) => {
           if (number[calledNum] && !number[calledNum].whiteList.includes(caller)) {
-            console.log(number[calledNum], number[calledNum].whiteList);
             // numArray = true
             twiml.say("We live bitches! Please say a short message about the nature of this call.");
           
