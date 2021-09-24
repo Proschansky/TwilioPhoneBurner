@@ -17,10 +17,10 @@ const client = require("twilio")(accountSid, authToken);
 const axios = require("axios");
 const { off } = require("process");
 const { request, response } = require("express");
-// const db = require('./database.js');
 const Firebase = require('firebase-admin');
 const { registerVersion } = require('@firebase/app');
 const { async } = require('@firebase/util');
+const bodyParser = require('body-parser');
 require('firebase/auth');
 require('firebase/app');
 
@@ -57,8 +57,9 @@ const allowCrossDomain = function (req, res, next) {
   let app = express();
   app.use(express())
   app.use(cors());
-  app.use(urlencoded({ extended: false }));
+  app.use(urlencoded({ extended: true }));
   app.use(express.static(__dirname + "/public"));
+  app.use(bodyParser.json())
   
   app.get('/ping', (req, res)=>{
     res.send("TWILIO PHONE BURNER IS LISTENING!");
@@ -98,10 +99,10 @@ const allowCrossDomain = function (req, res, next) {
       numsArray.map(number => {
         for (var i = 0; i < snap.val().length; i++) {
           if (snap.val()[i][number] != undefined && snap.val()[i][number].email === email) {
-            console.log(data)
+            console.log(data.whiteListNum)
             ref.child("numbers/" + i + "/" + number).update({
-              whiteList: JSON.parse(data.whiteListNum),
-              otherNumbers: JSON.parse(data.otherNum)
+              whiteList: data.whiteListNum,
+              otherNumbers: data.otherNum
             }).then(()=> {
               console.log("DATA SAVED")
               res.status(200).send("DATA SAVED")
@@ -197,7 +198,6 @@ const allowCrossDomain = function (req, res, next) {
             // Render the response as XML in reply to the webhook request
             response.type("text/xml");
             response.send(twiml.toString());
-            // return numArray;
           } else if (number[calledNum] && number[calledNum].whiteList.includes(caller)) {
             twiml.dial(calledNum)
             response.type("text/xml")
@@ -237,7 +237,6 @@ app.post("/notify", (request, response) => {
 
 // Create TwiML for outbound calls
 app.post("/wait", (request, response) => {
-  console.log(response.body)
   try {
     const res = new VoiceResponse();
     console.log(request.body)
@@ -264,7 +263,7 @@ app.post("/music", (request, response) => {
 
 
 app.post("/connect", (request, response) => {
-  console.log(response.body, request.body)
+  console.log(request.body)
   try{
     const res = new VoiceResponse();
     const dial = res.dial();
