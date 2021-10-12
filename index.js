@@ -150,7 +150,7 @@ const allowCrossDomain = function (req, res, next) {
     const { email } = request.params;
     
     try{
-      let calledNum = "+12223338989"
+      let calledNum = event.To || "+12223338989"
 
       
       getData(calledNum, response, request, next).then(data => {
@@ -171,14 +171,17 @@ const allowCrossDomain = function (req, res, next) {
   
   app.post("/incoming", (request, response, next) => {
 
+    console.log("request", request)
+    console.log("response", response)
+
     try {
 
 
 
       const twiml = new VoiceResponse();
 
-        let calledNum = "+12223338989"
-        let caller = "+18889997575"
+        let calledNum = event.To || "+12223338989"
+        let caller = event.From || "+18889997575"
       
 
       
