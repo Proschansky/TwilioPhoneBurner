@@ -20,3 +20,24 @@ describe('GET should PING server', () => {
       });
     })
 })
+
+describe('GET user', () => {
+
+    it('should error when no query is given', (done) => {
+        request(index)
+        .get('/getUser')
+        .end((err, res) => {
+            should.not.exist(err);
+            res.should.have.status(404);
+            res.body.should.be.a('object');
+            done();
+        })
+    })
+
+    it('should get user from firebase database by email', async () => {
+        const res = await chai.request(index).get('/getUser/kody.a.maus@gmail.com');
+        console.log(res.body)
+        expect(res).to.be.a("object")
+        expect(res.status).to.eql(200)
+    })
+})
