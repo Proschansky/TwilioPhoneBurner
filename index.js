@@ -65,13 +65,13 @@ const allowCrossDomain = function (req, res, next) {
     res.send("TWILIO PHONE BURNER IS LISTENING!");
   });
   
-  var currentNumber;
-  client.incomingPhoneNumbers()
-  .fetch()
-  .then(incoming => {
-    currentNumber = incoming.phone_number;
-    console.log(incoming)
-  })
+  // var currentNumber;
+  // client.incomingPhoneNumbers()
+  // .fetch()
+  // .then(incoming => {
+  //   currentNumber = incoming.phone_number;
+  //   console.log(incoming)
+  // })
 
   let numArray;
   
@@ -170,25 +170,17 @@ const allowCrossDomain = function (req, res, next) {
   })
   
   app.post("/incoming", (request, response, next) => {
-
-    console.log("request", request)
-    console.log("response", response)
-
     try {
-
-
-
       const twiml = new VoiceResponse();
 
-        let calledNum = request.body.To || "+12223338989"
-        let caller = request.body.From || "+18889997575"
-      
-
+        let calledNum = request.body.To
+        let caller = request.body.From
       
       getData(calledNum, response, request, next).then(data => {
+        numArray = data.val()[0].numbers
         numArray.map((number) => {
           if (number[calledNum] && !number[calledNum].whiteList.includes(caller)) {
-            // numArray = true
+            console.log("NOT IN WHITELIST")
             twiml.say("We live bitches! Please say a short message about the nature of this call.");
           
             twiml.record({
@@ -202,10 +194,11 @@ const allowCrossDomain = function (req, res, next) {
             response.type("text/xml");
             response.send(twiml.toString());
           } else if (number[calledNum] && number[calledNum].whiteList.includes(caller)) {
+            "IN WHITELIST"
             twiml.dial(calledNum)
             response.type("text/xml")
             response.send(twiml.toString())
-          }
+          } 
         })
       }).catch(err => console.log(err))
     
@@ -220,19 +213,26 @@ app.post("/notify", (request, response) => {
   try {
     const res = new VoiceResponse();
     const message = request.body.RecordingUrl
-    console.log(request.body);
+    let call = request.body.CallSid;
 
-    client.calls
-    .create({
-      //TODO: Need to forward to personal number through twilio number
-        twiml: "<Response><Play>" + message + "</Play><Gather action='https://twilio-phone-burner-4dgbzfempa-uc.a.run.app/connect' numDigits='1' input='dtmf'><Say>Press 1 to accept this call</Say></Gather></Response>",
-        //twiml: "<Response><Dial>610-568-8542</Dial></Response>", 
-        to: '+16105688542',
-        from: '+18327865719'
-      })
-    
-      response.type('text/xml');
-      response.send(res.toString());
+    async function getFunc (call) {
+      let callInfo = await client.calls(call).fetch();
+      return callInfo;
+    }
+
+    getFunc(call).then((blob) => {
+      client.calls
+          .create({
+            //TODO: Need to forward to personal number through twilio number
+              twiml: "<Response><Play>" + message + "</Play><Gather action='https://twilio-phone-burner-4dgbzfempa-uc.a.run.app/connect' numDigits='1' input='dtmf'><Say>Press 1 to accept this call</Say></Gather></Response>",
+              to: '+16105688542',
+              from: blob.to
+            }).catch(err => console.log(err))
+
+            response.type('text/xml');
+            response.send(res.toString()); 
+    }).catch(err => console.log(err))
+
   } catch (e) {
     console.log("ERROR IN CALL CONTINUATION", e)
   };
@@ -266,17 +266,16 @@ app.post("/music", (request, response) => {
 
 
 app.post("/connect", (request, response) => {
-  console.log(request.body)
+  let digit = request.body.Digits;
   try{
     const res = new VoiceResponse();
     const dial = res.dial();
-    res.say("Please wait while we connect you")
-    if (request.body.Digits === "1") {
-      dial.queue({
-        url: '/aboutToConnect'
-      }, 'waiting')
+    if (digit === "1") {
+      res.say("Please wait while we connect you")
+      console.log("THIS IS THE DIGIT", digit);
+      dial.queue('waiting')
     } else {
-      res.say('Sorry, we could not complete your call')
+      res.say('Sorry, we cannot get to your call at this time. We will call you back as soon as someone is available. Thank you.')
       res.hangup();
     }
     response.type('text/xml');
