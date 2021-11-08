@@ -23,3 +23,11 @@ Next, export the vairable so it is accessable by the project
   *Note: this will only be available per session, so it will need to be re-exported every time.*
 
 >**TODO**: Set up env variables inside google cloud, so this last step is not needed.
+
+## TODO List MVP features (Kody)
+
+- For every call, add calling number to users otherNumbers list in firebase
+
+- Find a way to get users number before gather verb in order to send the call dynamically to the user
+
+- Test the use of multiple calls at the same time to ensure it can be handled correctly.

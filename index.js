@@ -65,13 +65,7 @@ const allowCrossDomain = function (req, res, next) {
     res.send("TWILIO PHONE BURNER IS LISTENING!");
   });
   
-  // var currentNumber;
-  // client.incomingPhoneNumbers()
-  // .fetch()
-  // .then(incoming => {
-  //   currentNumber = incoming.phone_number;
-  //   console.log(incoming)
-  // })
+
 
   let numArray;
   
