@@ -26,7 +26,7 @@ Next, export the vairable so it is accessable by the project
 
 ## TODO List MVP features (Kody)
 
-- For every call, add calling number to users otherNumbers list in firebase
+- ~~For every call, add calling number to users otherNumbers list in firebase~~
 
 - Find a way to get users number before gather verb in order to send the call dynamically to the user
 

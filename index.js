@@ -93,13 +93,13 @@ const allowCrossDomain = function (req, res, next) {
       numsArray.map(number => {
         for (var i = 0; i < snap.val().length; i++) {
           if (snap.val()[i][number] != undefined && snap.val()[i][number].email === email) {
-            console.log(data.whiteListNum)
+            console.log(data.whiteList)
             ref.child("numbers/" + i + "/" + number).update({
-              whiteList: data.whiteListNum,
-              otherNumbers: data.otherNum
+              whiteList: data.whiteList,
+              otherNumbers: data.otherNumbers
             }).then(()=> {
               console.log("DATA SAVED")
-              res.status(200).send("DATA SAVED")
+              res.status(200).json({"SUCCESS": "DATA SAVED"})
             }).catch(err => {
               console.log("COULD NOT SAVE DATA", err)
               res.status(400).send(err)
@@ -174,7 +174,12 @@ const allowCrossDomain = function (req, res, next) {
         numArray = data.val()[0].numbers
         numArray.map((number) => {
           if (number[calledNum] && !number[calledNum].whiteList.includes(caller)) {
-            console.log("NOT IN WHITELIST")
+            console.log("NOT IN WHITELIST");
+            console.log(number[calledNum])
+            if (!number[calledNum].otherNumbers.includes(caller)) {
+              number[calledNum].otherNumbers.push(caller);
+              setData(number[calledNum], number[calledNum].email, response, request);
+            }
             twiml.say("We live bitches! Please say a short message about the nature of this call.");
           
             twiml.record({
