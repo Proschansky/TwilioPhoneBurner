@@ -169,6 +169,7 @@ const allowCrossDomain = function (req, res, next) {
 
         let calledNum = request.body.To
         let caller = request.body.From
+        // console.log(request.body)
       
       getData(calledNum, response, request, next).then(data => {
         numArray = data.val()[0].numbers
@@ -194,6 +195,7 @@ const allowCrossDomain = function (req, res, next) {
             response.send(twiml.toString());
           } else if (number[calledNum] && number[calledNum].whiteList.includes(caller)) {
             "IN WHITELIST"
+            // Add users personal number below
             twiml.dial(calledNum)
             response.type("text/xml")
             response.send(twiml.toString())
@@ -222,8 +224,8 @@ app.post("/notify", (request, response) => {
     getFunc(call).then((blob) => {
       client.calls
           .create({
-            //TODO: Need to forward to personal number through twilio number
               twiml: "<Response><Play>" + message + "</Play><Gather action='https://twilio-phone-burner-4dgbzfempa-uc.a.run.app/connect' numDigits='1' input='dtmf'><Say>Press 1 to accept this call</Say></Gather></Response>",
+              // Add users number below
               to: '+16105688542',
               from: blob.to
             }).catch(err => console.log(err))
@@ -237,11 +239,13 @@ app.post("/notify", (request, response) => {
   };
 });
 
-// Create TwiML for outbound calls
+// Adds caller to waitlist
 app.post("/wait", (request, response) => {
+  const callStatus = request.body.CallStatus
   try {
     const res = new VoiceResponse();
-    console.log(request.body)
+    // console.log("IN WAIT API", request.body)
+    
     res.enqueue({
       waitUrl: '/music'
     }, 'waiting')
@@ -253,14 +257,45 @@ app.post("/wait", (request, response) => {
 });
 
 app.post("/music", (request, response) => {
+  console.log(request.body)
+  const waitlistSize = Number(request.body.CurrentQueueSize);
+  const res = new VoiceResponse();
   try{
-    const res = new VoiceResponse();
-    res.play('http://com.twilio.sounds.music.s3.amazonaws.com/MARKOVICHAMP-Borghestral.mp3');
-    response.type('text/xml');
-    response.send(res.toString());
+    if (waitlistSize <= 1) {
+      res.play('http://com.twilio.sounds.music.s3.amazonaws.com/MARKOVICHAMP-Borghestral.mp3');
+      response.type('text/xml');
+      response.send(res.toString());
+    } else {
+      res.say("We're sorry, we cannot get to your call at this time, please leave a full message and we will return your call as soon as possible.")
+      res.record({
+        action: "/voicemail",
+        maxLength: 20
+      })
+      response.type('text/xml');
+      response.send(res.toString());
+    }
   } catch (e) {
       console.log("ERROR in wait", e);
   }
+  })
+
+  app.post("/voicemail", (request, response) => {
+    const recording = request.body.RecordingUrl;
+    const twilioNumber = request.body.To
+    const caller = request.body.From
+
+    const message = `You have a new voicemail from ${caller}: ${recording}.mp3`;
+    try {
+      client.messages.create({
+        from: twilioNumber,
+        to: "+16105688542",
+        body: message
+      })
+      response.status(200).send("message sent!");
+    } catch (e) {
+      console.log(e)
+      response.status(500).send("Error in sending voicemail URL")
+    }
   })
 
 
