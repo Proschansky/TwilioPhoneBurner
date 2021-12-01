@@ -305,7 +305,7 @@ const personalNumber = "+16105688542"
     }
     const sortTimestamp = (dbVoicemailArray) => {
       dbVoicemailArray.sort((x,y) => {
-        return Date.parse(y.timestamp) - Date.parse(x.timestamp);
+        return Date.parse(x.timestamp) - Date.parse(y.timestamp);
       })
 
     }
@@ -315,16 +315,12 @@ const personalNumber = "+16105688542"
         let numArray = data.val()[0].numbers
         numArray.map((number, index) => {
           if (number[twilioNumber]) {
-            number[twilioNumber].voicemail.forEach(vm => {
-              if (!vm.url.includes(`${recording}.mp3`)) {
                 number[twilioNumber].voicemail.push(newVoicemail);
                 sortTimestamp(number[twilioNumber].voicemail);
                 setData(number[twilioNumber], number[twilioNumber].email, response, request);
-                response.status(200).send("Voicemail Added!")
-              }
-            })
           }
         })
+        response.status(200).send("Voicemail Saved!")
       }).catch(err => console.log(err))
     } catch (e) {
       console.log(e)
@@ -350,23 +346,6 @@ const personalNumber = "+16105688542"
       console.log("ERROR", e);
     }
   })
-
-  app.post("/rejectedCall", (request, response) => {
-    const res = new VoiceResponse();
-    try {
-      res.say("We're sorry, we cannot get to your call at this time, please leave a full message and we will return your call as soon as possible.");
-      // console.log("BEFORE RECORDING")
-      // res.record({
-      //   recordingStatusCallback: '/voicemail'
-      // });
-      res.hangup();
-      response.type('text/xml')
-      response.send(res.toString());
-    } catch (e) {
-      console.log("Error", e);
-      response.status(500).send("Error in sending rejected call to voicemail")
-    }
-  });
 
   let port = process.env.PORT || 3001;
   app.listen(port, () => {
