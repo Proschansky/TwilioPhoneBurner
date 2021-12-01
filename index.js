@@ -21,38 +21,46 @@ const Firebase = require('firebase-admin');
 const { registerVersion } = require('@firebase/app');
 const { async } = require('@firebase/util');
 const bodyParser = require('body-parser');
+const { time } = require('console');
 require('firebase/auth');
 require('firebase/app');
 
+//#####################################
+//######### USER VARS #################
+const userNumber = "+12223338989"
+const personalNumber = "+16105688542"
+//#####################################
+//#####################################
 
-const firebaseConfig = {
-  apiKey: process.env.apiKey,
-  authDomain: process.env.authDomain,
-  databaseURL: process.env.databaseURL,
-  projectId: process.env.projectId,
-  storageBucket: process.env.storageBucket,
-  messagingSenderId: process.env.messagingSenderId,
-  appId: process.env.appId,
-  measurementId: process.env.measurementId
-};
-Firebase.initializeApp(firebaseConfig);
-const database = Firebase.database().ref("numbers/")
 
-const allowCrossDomain = function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, Content-Length, X-Requested-With"
-    );
-    
-    // intercept OPTIONS method
-    if ("OPTIONS" == req.method) {
-      res.send(200);
-    } else {
-      next();
-    }
+  const firebaseConfig = {
+    apiKey: process.env.apiKey,
+    authDomain: process.env.authDomain,
+    databaseURL: process.env.databaseURL,
+    projectId: process.env.projectId,
+    storageBucket: process.env.storageBucket,
+    messagingSenderId: process.env.messagingSenderId,
+    appId: process.env.appId,
+    measurementId: process.env.measurementId
   };
+  Firebase.initializeApp(firebaseConfig);
+  const database = Firebase.database().ref("numbers/")
+
+  const allowCrossDomain = function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, Content-Length, X-Requested-With"
+      );
+      
+      // intercept OPTIONS method
+      if ("OPTIONS" == req.method) {
+        res.send(200);
+      } else {
+        next();
+      }
+    };
   
   let app = express();
   app.use(express())
@@ -65,9 +73,6 @@ const allowCrossDomain = function (req, res, next) {
     res.send("TWILIO PHONE BURNER IS LISTENING!");
   });
   
-
-
-  let numArray;
   
   async function getData (data, res, req, next) {
       return await database.once('value', (snap) => {
@@ -93,13 +98,13 @@ const allowCrossDomain = function (req, res, next) {
       numsArray.map(number => {
         for (var i = 0; i < snap.val().length; i++) {
           if (snap.val()[i][number] != undefined && snap.val()[i][number].email === email) {
-            console.log(data.whiteList)
             ref.child("numbers/" + i + "/" + number).update({
               whiteList: data.whiteList,
-              otherNumbers: data.otherNumbers
+              otherNumbers: data.otherNumbers,
+              voicemail: data.voicemail
             }).then(()=> {
               console.log("DATA SAVED")
-              res.status(200).json({"SUCCESS": "DATA SAVED"})
+              res.status(200)
             }).catch(err => {
               console.log("COULD NOT SAVE DATA", err)
               res.status(400).send(err)
@@ -137,18 +142,19 @@ const allowCrossDomain = function (req, res, next) {
       response.sendStatus(400);
     }
   })
-  
-  
+    
+    
   app.get("/getUser/:email", (request, response, next) => {
 
     const { email } = request.params;
     
     try{
-      let calledNum = request.body.To || "+12223338989"
+      // needs to be hard coded per user. Twilio number goes here
+      let calledNum = userNumber;
 
       
       getData(calledNum, response, request, next).then(data => {
-        numArray = data.val()[0].numbers
+        let numArray = data.val()[0].numbers
         numArray.map((number) => {
           if (number[calledNum] && number[calledNum].email === email) {
             response.send(number[calledNum])
@@ -162,7 +168,7 @@ const allowCrossDomain = function (req, res, next) {
       response.sendStatus(400);
     }
   })
-  
+    
   app.post("/incoming", (request, response, next) => {
     try {
       const twiml = new VoiceResponse();
@@ -172,7 +178,7 @@ const allowCrossDomain = function (req, res, next) {
         // console.log(request.body)
       
       getData(calledNum, response, request, next).then(data => {
-        numArray = data.val()[0].numbers
+        let numArray = data.val()[0].numbers
         numArray.map((number) => {
           if (number[calledNum] && !number[calledNum].whiteList.includes(caller)) {
             console.log("NOT IN WHITELIST");
@@ -196,7 +202,7 @@ const allowCrossDomain = function (req, res, next) {
           } else if (number[calledNum] && number[calledNum].whiteList.includes(caller)) {
             "IN WHITELIST"
             // Add users personal number below
-            twiml.dial(calledNum)
+            twiml.dial(personalNumber)
             response.type("text/xml")
             response.send(twiml.toString())
           } 
@@ -206,131 +212,165 @@ const allowCrossDomain = function (req, res, next) {
   } catch (e) {
     console.log("ERROR IN INCOMING CALL", e);
   }
-});
+  });
 
 
-app.post("/notify", (request, response) => {
-  
-  try {
-    const res = new VoiceResponse();
-    const message = request.body.RecordingUrl
-    let call = request.body.CallSid;
-
-    async function getFunc (call) {
-      let callInfo = await client.calls(call).fetch();
-      return callInfo;
-    }
-
-    getFunc(call).then((blob) => {
-      client.calls
-          .create({
-              twiml: "<Response><Play>" + message + "</Play><Gather action='https://twilio-phone-burner-4dgbzfempa-uc.a.run.app/connect' numDigits='1' input='dtmf'><Say>Press 1 to accept this call</Say></Gather></Response>",
-              // Add users number below
-              to: '+16105688542',
-              from: blob.to
-            }).catch(err => console.log(err))
-
-            response.type('text/xml');
-            response.send(res.toString()); 
-    }).catch(err => console.log(err))
-
-  } catch (e) {
-    console.log("ERROR IN CALL CONTINUATION", e)
-  };
-});
-
-// Adds caller to waitlist
-app.post("/wait", (request, response) => {
-  const callStatus = request.body.CallStatus
-  try {
-    const res = new VoiceResponse();
-    // console.log("IN WAIT API", request.body)
+  app.post("/notify", (request, response) => {
     
-    res.enqueue({
-      waitUrl: '/music'
-    }, 'waiting')
-    response.type('text/xml');
-    response.send(res.toString());
-  } catch (e) {
-    console.log("ERROR", e);
-  }
-});
+    try {
+      const res = new VoiceResponse();
+      const message = request.body.RecordingUrl
+      let call = request.body.CallSid;
 
-app.post("/music", (request, response) => {
-  console.log(request.body)
-  const waitlistSize = Number(request.body.CurrentQueueSize);
-  const res = new VoiceResponse();
-  try{
-    if (waitlistSize <= 1) {
-      res.play('http://com.twilio.sounds.music.s3.amazonaws.com/MARKOVICHAMP-Borghestral.mp3');
-      response.type('text/xml');
-      response.send(res.toString());
-    } else {
-      res.say("We're sorry, we cannot get to your call at this time, please leave a full message and we will return your call as soon as possible.")
+      async function getFunc (call) {
+        let callInfo = await client.calls(call).fetch();
+        return callInfo;
+      }
+
+      getFunc(call).then((blob) => {
+        client.calls
+            .create({
+                twiml: "<Response><Play>" + message + "</Play><Gather action='https://twilio-phone-burner-4dgbzfempa-uc.a.run.app/connect' numDigits='1' input='dtmf'><Say>Press 1 to accept this call</Say></Gather></Response>",
+                // Add users number below
+                to: personalNumber,
+                from: blob.to
+              }).catch(err => console.log(err))
+
+              response.type('text/xml');
+              response.send(res.toString()); 
+      }).catch(err => console.log(err))
+
+    } catch (e) {
+      console.log("ERROR IN CALL CONTINUATION", e)
+    };
+  });
+
+  // Adds caller to waitlist
+  app.post("/wait", (request, response) => {
+    const callStatus = request.body.CallStatus
+    try {
+      const res = new VoiceResponse();
+      // console.log("IN WAIT API", request.body)
+      
+      res.enqueue({
+        waitUrl: '/music'
+      }, 'waiting');
+      res.say("We're sorry, we cannot get to your call at this time, please leave a full message and we will return your call as soon as possible.");
       res.record({
         action: "/voicemail",
-        maxLength: 20
-      })
+        // recordingStatusCallback: "/voicemail",
+        maxLength: 30
+      });
       response.type('text/xml');
       response.send(res.toString());
+    } catch (e) {
+      console.log("ERROR", e);
     }
-  } catch (e) {
-      console.log("ERROR in wait", e);
-  }
-  })
+  });
 
-  app.post("/voicemail", (request, response) => {
-    const recording = request.body.RecordingUrl;
-    const twilioNumber = request.body.To
-    const caller = request.body.From
+  app.post("/music", (request, response) => {
+    console.log(request.body)
+    const waitlistSize = Number(request.body.CurrentQueueSize);
+    const res = new VoiceResponse();
+    try{
+      if (waitlistSize <= 1) {
+        res.play(/*'http://com.twilio.sounds.music.s3.amazonaws.com/MARKOVICHAMP-Borghestral.mp3'*/ 'https://api.twilio.com/cowbell.mp3');
+        // res.record({
+        //   action: "/rejectedCall",
+        //   recordingStatusCallback: "/voicemail",
+        //   maxLength: 60
+        // });
+        res.leave();
+        response.type('text/xml');
+        response.send(res.toString());
+      } else {
+        res.leave();
+        response.type('text/xml');
+        response.send(res.toString());
+      }
+    } catch (e) {
+        console.log("ERROR in wait", e);
+    }
+    })
 
-    const message = `You have a new voicemail from ${caller}: ${recording}.mp3`;
-    try {
-      client.messages.create({
-        from: twilioNumber,
-        to: "+16105688542",
-        body: message
+  app.post("/voicemail", (request, response, next) => {
+    let recording = request.body.RecordingUrl;
+    let twilioNumber = request.body.To
+    let currCaller = request.body.From
+    let currTimestamp = Date.now();
+    let newVoicemail = {
+      timestamp: currTimestamp,
+      caller: currCaller,
+      url: `${recording}.mp3`
+    }
+    const sortTimestamp = (dbVoicemailArray) => {
+      dbVoicemailArray.sort((x,y) => {
+        return Date.parse(y.timestamp) - Date.parse(x.timestamp);
       })
-      response.status(200).send("message sent!");
+
+    }
+
+    try {
+      getData(twilioNumber, response, request, next).then(data => {
+        let numArray = data.val()[0].numbers
+        numArray.map((number, index) => {
+          if (number[twilioNumber]) {
+            number[twilioNumber].voicemail.forEach(vm => {
+              if (!vm.url.includes(`${recording}.mp3`)) {
+                number[twilioNumber].voicemail.push(newVoicemail);
+                sortTimestamp(number[twilioNumber].voicemail);
+                setData(number[twilioNumber], number[twilioNumber].email, response, request);
+                response.status(200).send("Voicemail Added!")
+              }
+            })
+          }
+        })
+      }).catch(err => console.log(err))
     } catch (e) {
       console.log(e)
       response.status(500).send("Error in sending voicemail URL")
     }
   })
 
-
-app.post("/connect", (request, response) => {
-  let digit = request.body.Digits;
-  try{
-    const res = new VoiceResponse();
-    const dial = res.dial();
-    if (digit === "1") {
-      res.say("Please wait while we connect you")
-      console.log("THIS IS THE DIGIT", digit);
-      dial.queue('waiting')
-    } else {
-      res.say('Sorry, we cannot get to your call at this time. We will call you back as soon as someone is available. Thank you.')
-      res.hangup();
+  app.post("/connect", (request, response) => {
+    let digit = request.body.Digits;
+    try{
+      const res = new VoiceResponse();
+      const dial = res.dial();
+      if (digit === "1") {
+        res.say("Please wait while we connect you")
+        console.log("THIS IS THE DIGIT", digit);
+        dial.queue('waiting')
+      } else {
+        res.hangup();
+      }
+      response.type('text/xml');
+      response.send(res.toString());
+    } catch (e) {
+      console.log("ERROR", e);
     }
-    response.type('text/xml');
-    response.send(res.toString());
-  } catch (e) {
-    console.log("ERROR", e);
-  }
-})
+  })
 
-app.post("/aboutToConnect", (request, response) => {
-  try {
+  app.post("/rejectedCall", (request, response) => {
     const res = new VoiceResponse();
-    res.say("Connecting your call")
-  } catch (e) {
-    console.log("Error", e);
-  }
-});
+    try {
+      res.say("We're sorry, we cannot get to your call at this time, please leave a full message and we will return your call as soon as possible.");
+      // console.log("BEFORE RECORDING")
+      // res.record({
+      //   recordingStatusCallback: '/voicemail'
+      // });
+      res.hangup();
+      response.type('text/xml')
+      response.send(res.toString());
+    } catch (e) {
+      console.log("Error", e);
+      response.status(500).send("Error in sending rejected call to voicemail")
+    }
+  });
 
-let port = process.env.PORT || 3001;
-app.listen(port, () => {
-  console.log(`Express Server listening on ${port}`);
-});
+  let port = process.env.PORT || 3001;
+  app.listen(port, () => {
+    console.log(`Express Server listening on ${port}`);
+  });
 
-module.exports = app;
+  module.exports = app;
