@@ -27,8 +27,8 @@ require('firebase/app');
 
 //#####################################
 //######### USER VARS #################
-const userNumber = "+12223338989"
-const personalNumber = "+16105688542"
+const userNumber = process.env.USER_NUMBER
+const personalNumber = process.env.PERSONAL_NUMBER
 //#####################################
 //#####################################
 
@@ -187,11 +187,11 @@ const personalNumber = "+16105688542"
               number[calledNum].otherNumbers.push(caller);
               setData(number[calledNum], number[calledNum].email, response, request);
             }
-            twiml.say("We live bitches! Please say a short message about the nature of this call.");
+            twiml.say("Please say a short message about the nature of this call.");
           
             twiml.record({
-              timeout: 10,
-              maxLength: 10,
+              timeout: 15,
+              maxLength: 15,
               action: '/wait',
               recordingStatusCallback: '/notify'
             });

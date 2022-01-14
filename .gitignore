@@ -49,5 +49,11 @@ jspm_packages
 *.env
 
 select-caller.json
+
+users.json
+
+package-lock.json
+
+yarn.lock
 #Store.js with personal data
 # frontend/src/Store.js
